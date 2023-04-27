@@ -117,9 +117,11 @@ class Critic(tf.keras.Model):
 
 @gin.configurable(blacklist=["state_dim", "action_dim", "max_action"])
 class TD3(tracking.AutoTrackable):
-    def __init__(self, state_dim, action_dim, max_action, feature_extractor, linear_range=1e5, layer_units=(400, 300), action_noise=0.1):
+    def __init__(self, state_dim, action_dim, max_action, feature_extractor, linear_range=100000, layer_units=(400, 300), action_noise=0.1):
         self._extractor = feature_extractor
-        self._action_noise = action_noise
+        self._action_noise = 1.0
+        self._policy_noise = 1.0
+        self.linear_range = linear_range
 
         self.actor = Actor(self._extractor.dim_state_features, action_dim, max_action, layer_units=layer_units)
         self.actor_target = Actor(self._extractor.dim_state_features, action_dim, max_action, layer_units=layer_units)
@@ -165,16 +167,20 @@ class TD3(tracking.AutoTrackable):
         if len(state.shape) == 1:
             state = np.expand_dims(state, axis=0)
             action = self._select_action_body(tf.constant(state))
-            # action = tf.clip_by_value(action + tf.random.normal(shape=action.shape, stddev=self._action_noise), \
-            #                       -self._max_action, self._max_action)  # modified
-            action = tf.clip_by_value(
-                action + tf.random.normal(shape=action.shape, stddev=self._action_noise*self._max_action), \
-                -self._max_action, self._max_action)
+            action = tf.clip_by_value(action + tf.random.normal(shape=action.shape, stddev=self._action_noise), \
+                                  -self._max_action, self._max_action)  # modified
+            # action = tf.clip_by_value(
+            #     action + tf.random.normal(shape=action.shape, stddev=self._action_noise*self._max_action), \
+            #     -self._max_action, self._max_action)
             action = tf.squeeze(action, axis=0)
+            # import ipdb
+            # ipdb.set_trace()
         else:
             action = self._select_action_body(state)  # modified
             action = tf.clip_by_value(action + tf.random.normal(shape=action.shape, stddev=self._action_noise), \
                                   -self._max_action, self._max_action)  # modified
+            self._action_noise = max(self._action_noise - 0.9/self.linear_range, 0.1)
+            # print('step = {}, self._action_noise = {}'.format(step, self._action_noise))
 
         return action.numpy()
 
@@ -184,12 +190,14 @@ class TD3(tracking.AutoTrackable):
         action = self.actor_target(features)
         return action
 
-    def train(self, replay_buffer, batch_size=256, discount=0.99, tau=0.005):
+    def train(self, replay_buffer, batch_size=256, discount=0.99, tau=0.005, step=1):
         self._update_count += 1
 
         state, action, next_state, reward, done = replay_buffer.sample(batch_size)
         done = np.array(done, dtype=np.float32)
         critic_loss = self._critic_update(state, action, next_state, reward, done, discount)
+        self._policy_noise = max(self._policy_noise - 0.8/self.linear_range, 0.1)
+        # print('step = {}, self._policy_noise = {}'.format(step, self._policy_noise))
 
         tf.summary.scalar(name="loss/CriticLoss", data=critic_loss)
 
@@ -198,7 +206,9 @@ class TD3(tracking.AutoTrackable):
             tf.summary.scalar(name="loss/ActorLoss", data=actor_loss)
         else:
             actor_loss = None
-        tf.summary.scalar(name='loss/action_noise', data=self._action_noise)
+        with tf.summary.record_if(True):
+            tf.summary.scalar(name='loss/action_noise', data=self._action_noise)
+            tf.summary.scalar(name='loss/policy_noise', data=self._policy_noise)
 
         return actor_loss, critic_loss
 
@@ -210,8 +220,7 @@ class TD3(tracking.AutoTrackable):
             next_states_features = self._extractor.features_from_states(next_states)
             next_action = self.actor_target(next_states_features)
             noise_shape = tf.shape(next_action)
-            action_noise = tf.random.normal(noise_shape, mean=0.0, stddev=policy_noise*self._max_action) # modify
-            noise_clip = noise_clip * self._max_action
+            action_noise = tf.random.normal(noise_shape, mean=0.0, stddev=self._policy_noise)
             action_noise = tf.clip_by_value(action_noise, -noise_clip, noise_clip)
 
             next_actions = tf.clip_by_value(next_action + action_noise, -self._max_action, self._max_action)

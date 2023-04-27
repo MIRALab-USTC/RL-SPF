@@ -87,13 +87,16 @@ class DensenetBlock(tf.keras.Model):
         super().__init__(name=name)
 
         self.act = activation
+        # kernel_initializer=kernel_initializer, bias--default
         self.fc = layers.Dense(units,
-                               kernel_initializer=kernel_initializer,
+                               kernel_initializer=tf.keras.initializers.he_uniform(),
+                               bias_initializer=tf.keras.initializers.he_uniform(), 
                                trainable=trainable, name="fc")
 
         self.batchnorm = batchnorm
         if batchnorm:
-            self.normalizer = layers.BatchNormalization()
+            self.normalizer = layers.LayerNormalization(epsilon=1e-5)
+            # self.normalizer = layers.BatchNormalization()
 
     def call(self, inputs, training):
         identity_map = inputs
@@ -101,7 +104,8 @@ class DensenetBlock(tf.keras.Model):
         features = self.fc(inputs)
 
         if self.batchnorm:
-            features = self.normalizer(features, training=training)
+            # features = self.normalizer(features, training=training)
+            features = self.normalizer(features)
 
         features = self.act(features)
 

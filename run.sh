@@ -212,7 +212,7 @@
 #                     --remark 'hc transfer, masses & frictions' \
 #                     > ./my_log/exp_hc_period.log 2>&1 &
 
-CUDA_VISIBLE_DEVICES=5 python -u eager_main.py \
+CUDA_VISIBLE_DEVICES=4 python -u eager_main.py \
                     --policy SAC \
                     --env HalfCheetah-v2 \
                     --gin ./gins/HalfCheetah.gin \
@@ -224,6 +224,8 @@ CUDA_VISIBLE_DEVICES=5 python -u eager_main.py \
                     --cosine_similarity \
                     --tau 0.01 \
                     --target_update_freq 1000 \
+                    --td3_linear_range 1000 \
+                    --pre_train_step 1 \
                     --remark 'hc test fourier, test fourier' \
                     --dir-root "./output_SAC" \
                     > ./my_log/exp_fourier_test.log 2>&1 &

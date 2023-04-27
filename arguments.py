@@ -50,11 +50,19 @@ def parse_args():
     parser.add_argument("--pre_train_step", default=10000, type=int)
     parser.add_argument("--save_freq", default=100000, type=int)
     # parser.add_argument("--visual_buffer_freq", default=5000, type=int)
-
+    
     # target
     parser.add_argument("--target_update_freq", default=100, type=int)
     parser.add_argument("--tau", default=0.005, type=float)
-    
+
+    # ppo
+    parser.add_argument("--steps_per_epoch", default=4000, type=int)
+    parser.add_argument("--lam", default=0.97, type=float)
+    parser.add_argument('--cpu', type=int, default=4)
+    parser.add_argument("--update_every", default=1, type=int)
+
+    # td3
+    parser.add_argument("--td3_linear_range", default=100000, type=int, help='interval of linearly decreasing noise for td3')
 
     parser.add_argument("--remark", default="dtft, use projection")
     # "dtft, tune the hyperparameter dim_discretize from 128 to 64"

@@ -23,8 +23,8 @@ layers = tf.keras.layers
 
 @gin.configurable
 class OFENet(tf.keras.Model):
-    def __init__(self, dim_state, dim_action, dim_output, dim_discretize, 
-                 total_units, num_layers, batchnorm, 
+    def __init__(self, dim_state, dim_action, dim_discretize, total_units,
+                 num_layers, batchnorm, 
                  fourier_type, discount,  
                  use_projection=True, projection_dim=256, cosine_similarity=True, 
                  activation=tf.nn.relu, block="densenet",
@@ -82,10 +82,9 @@ class OFENet(tf.keras.Model):
         self.dim_state = dim_state
         self.dim_action = dim_action
         self.dim_discretize = dim_discretize
-        self.dim_output = dim_output
 
         self.end = int(dim_discretize*0.5 + 1)  # predict fourier function in [0,\pi]
-        self.prediction = Prediction(dim_discretize=self.end, dim_state=dim_output)
+        self.prediction = Prediction(dim_discretize=self.end, dim_state=dim_state)
 
         if use_projection == True:
             self.projection = Projection(classifier_type='mlp', output_dim=projection_dim)
@@ -167,8 +166,8 @@ class OFENet(tf.keras.Model):
 
         # predictor layer
         predictor_re, predictor_im = self.prediction(features, training=training)
-        predictor_re = tf.reshape(predictor_re, [batch_size, self.end, self.dim_output])
-        predictor_im = tf.reshape(predictor_im, [batch_size, self.end, self.dim_output])
+        predictor_re = tf.reshape(predictor_re, [batch_size, self.end, self.dim_state])
+        predictor_im = tf.reshape(predictor_im, [batch_size, self.end, self.dim_state])
         # predictor_re = tf.reshape(self.out_layer_re(features), [batch_size, self.dim_discretize, self.dim_state])
         # predictor_im = tf.reshape(self.out_layer_im(features), [batch_size, self.dim_discretize, self.dim_state])
 
@@ -225,8 +224,8 @@ class OFENet(tf.keras.Model):
             with tf.GradientTape(persistent=True) as tape:
 
                 dones = tf.cast(dones, dtype=tf.float32)
-                dones = tf.tile(tf.expand_dims(dones, axis = -1), multiples=[1, self.end, self.dim_output])
-                O = tf.tile(tf.expand_dims(next_states[:, :self.dim_output], axis = 1), multiples=[1, self.end, 1])
+                dones = tf.tile(tf.expand_dims(dones, axis = -1), multiples=[1, self.end, self.dim_state])
+                O = tf.tile(tf.expand_dims(next_states, axis = 1), multiples=[1, self.end, 1])
                 [predicted_re, predicted_im] = self([states, actions])
                 [next_predicted_re, next_predicted_im] = target_model([next_states, next_actions])
 

@@ -14,10 +14,19 @@ def swish(features):
     with tf.name_scope("swish"):
         return features * tf.nn.sigmoid(features)
 
+@gin.configurable
+def tanh(features):
+    with tf.name_scope("tanh"):
+        return tf.nn.tanh(features)
 
 def set_gpu_device_growth():
+    configuration = tf.compat.v1.ConfigProto()
+    configuration.gpu_options.allow_growth = True
+    session = tf.compat.v1.Session(config=configuration)
+    print('available gpu:', tf.config.experimental.list_physical_devices("GPU"))
     for cur_device in tf.config.experimental.list_physical_devices("GPU"):
         tf.config.experimental.set_memory_growth(cur_device, enable=True)
+        print("Physical GPUs:", cur_device)
 
 
 def get_target_dim(env_name):
@@ -36,15 +45,15 @@ def get_target_dim(env_name):
 
 def get_default_steps(env_name):
     if env_name.startswith('HalfCheetah'):
-        default_steps = 1000000
+        default_steps = 3000000
     elif env_name.startswith('Hopper'):
         default_steps = 1000000
     elif env_name.startswith('Walker2d'):
-        default_steps = 1000000
+        default_steps = 5000000
     elif env_name.startswith('Ant'):
-        default_steps = 1000000
+        default_steps = 5000000
     elif env_name.startswith('Swimmer'):
-        default_steps = 1000000
+        default_steps = 3000000
     elif env_name.startswith('Humanoid'):
         default_steps = 3000000
     elif env_name.startswith('InvertedDoublePendulum'):

@@ -1,5 +1,5 @@
 algo=TD3
-
+# linear_range = (100000)
 # gpu_id=(6 6 6 7 5 7)
 # env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 # gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
@@ -16,7 +16,7 @@ algo=TD3
 # gin_id=(Swimmer)
 # seed_id=(0)
 
-gpu_id=(5)
+gpu_id=(0)
 env_id=(Humanoid)
 gin_id=(Humanoid)
 seed_id=(0)
@@ -29,8 +29,8 @@ seed_id=(0)
 
 for ((i=0;i<${#gpu_id[@]};i++))
 do
-    CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main.py \
-                    --policy ${algo} \
+    CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_linTD3.py \
+                    --policy ${algo}linear \
                     --env ${env_id[i]}-v2 \
                     --gin ./gins_${algo}/${gin_id[i]}.gin \
                     --seed ${seed_id[i]} \
@@ -38,23 +38,23 @@ do
                     --dim_discretize 128 \
                     --use_projection \
                     --projection_dim 512 \
-                    --pre_train_step 10000 \
+                    --pre_train_step 1000 \
                     --target_update_freq 1000 \
                     --cosine_similarity \
                     --tau 0.01 \
                     --save_model \
                     --dir-root "./output_${algo}" \
-                    --remark "tf-${env_id[i]}, FoSta,  update_every and linear noise, weight_init_orthogonal, (400, 300) TD3, tau=0.01, dim_output=292" \
-                    > ./my_log/exp_${algo}_${env_id[i]}_fourier.log 2>&1 &
+                    --remark "tf-${env_id[i]}, FoSta, without update_every, add linear noise, weight_init_orthogonal, (400, 300) TD3, per_train_step" \
+                    > ./my_log/exp_${algo}linear_${env_id[i]}_fourier1.log 2>&1 &
 
-    # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper.py \
-    #                 --policy ${algo} \
+    # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper_linTD3.py \
+    #                 --policy ${algo}small \
     #                 --env ${env_id[i]}-v2 \
     #                 --gin ./gins_${algo}/${gin_id[i]}.gin \
     #                 --seed ${seed_id[i]} \
     #                 --save_model \
     #                 --dir-root "./output_${algo}" \
-    #                 > ./my_log/exp_${algo}_${env_id[i]}_ofePaper.log 2>&1 &
+    #                 > ./my_log/exp_small${algo}_${env_id[i]}_ofePaper.log 2>&1 &
 
     # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper.py \
     #                 --policy ${algo} \
