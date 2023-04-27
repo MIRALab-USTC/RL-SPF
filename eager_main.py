@@ -107,8 +107,8 @@ def make_exp_name(args):
         exp_name = exp_name + "_" + args.name
 
     exp_name = exp_name + "_low15-high15-freq-loss"
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
+    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
 
     return exp_name
 
@@ -188,7 +188,7 @@ def feature_extractor(extractor_kwargs=dict(), name=None, skip_action_branch=Fal
     return extractor, extractor_target
 
 
-def main():
+def main(args):
     logger = logging.Logger(name="main")
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
@@ -196,7 +196,6 @@ def main():
                                            datefmt="%m/%d %I:%M:%S"))
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
-    args = parse_args()
     args_text = '\n'.join([f'{k:<20}: {v}' for k, v in vars(args).items()])
     logger.info(args_text)
 
@@ -434,4 +433,16 @@ if __name__ == "__main__":
                         format='%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
                         )
 
-    main()
+    args = parse_args()
+    if args.env.startswith('Humanoid'):
+        args.steps = 10000000
+    main(args)
+
+    # # seed_list = [0,1,2,5,6]
+    # seed_list = [7,8,10,11,12]
+    # if args.env.startswith('Hopper'):
+    #     seed_list = [5,6,7,8]
+
+    # for seed in seed_list:
+    #     args.seed = seed
+    #     main(args)

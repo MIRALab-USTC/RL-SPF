@@ -115,7 +115,7 @@ class Critic(tf.keras.Model):
         return features
 
 
-@gin.configurable(blacklist=["state_dim", "action_dim", "max_action"])
+# @gin.configurable(blacklist=["state_dim", "action_dim", "max_action"])
 class TD3(tracking.AutoTrackable):
     def __init__(self, state_dim, action_dim, max_action, feature_extractor, linear_range=1e5, layer_units=(400, 300), action_noise=0.1):
         self._extractor = feature_extractor

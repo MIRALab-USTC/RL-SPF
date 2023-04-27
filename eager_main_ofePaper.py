@@ -89,8 +89,8 @@ def make_exp_name(args):
     if args.name is not None:
         exp_name = exp_name + "_" + args.name
 
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
+    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
 
     return exp_name
 
@@ -167,7 +167,7 @@ def feature_extractor(env_name, dim_state, dim_action, name=None, skip_action_br
     return extractor
 
 
-def main():
+def main(args):
     logger = logging.Logger(name="main")
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
@@ -175,22 +175,6 @@ def main():
                                            datefmt="%m/%d %I:%M:%S"))
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--policy", default="DDPG")
-    parser.add_argument("--env", default="HalfCheetah-v2")
-    parser.add_argument("--seed", default=0, type=int)
-    parser.add_argument("--steps", default=1000000, type=int)
-    parser.add_argument("--sac-units", default=256, type=int)
-    parser.add_argument("--batch_size", default=256, type=int)
-    parser.add_argument("--gin", default=None)
-    parser.add_argument("--name", default=None, type=str)
-    parser.add_argument("--force", default=False, action="store_true",
-                        help="remove existed directory")
-    parser.add_argument("--dir-root", default="output", type=str)
-    parser.add_argument("--save_model", default=False, action="store_true")
-    parser.add_argument("--save_freq", default=100000, type=int)
-    args = parser.parse_args()
 
     # CONSTANTS
     if args.gin is not None:
@@ -368,4 +352,31 @@ if __name__ == "__main__":
                         format='%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
                         )
 
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--policy", default="DDPG")
+    parser.add_argument("--env", default="HalfCheetah-v2")
+    parser.add_argument("--seed", default=0, type=int)
+    parser.add_argument("--steps", default=1000000, type=int)
+    parser.add_argument("--sac-units", default=256, type=int)
+    parser.add_argument("--batch_size", default=256, type=int)
+    parser.add_argument("--gin", default=None)
+    parser.add_argument("--name", default=None, type=str)
+    parser.add_argument("--force", default=False, action="store_true",
+                        help="remove existed directory")
+    parser.add_argument("--dir-root", default="output", type=str)
+    parser.add_argument("--save_model", default=False, action="store_true")
+    parser.add_argument("--save_freq", default=100000, type=int)
+    args = parser.parse_args()
+    
+    if args.env.startswith('Humanoid'):
+        args.steps = 10000000
+    main(args)
+    # # seed_list = [0,1,2,5,6]
+    # seed_list = [7,8,10,11,12]
+    # # main(args)
+    # if args.env.startswith('Hopper'):
+    #     seed_list = [5,6,7,8]
+
+    # for seed in seed_list:
+    #     args.seed = seed
+    #     main(args)

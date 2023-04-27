@@ -24,11 +24,24 @@ algo=PPO
 # seed_id=(5 5 5 5)
 # update_every_id=(1 2 5 40)
 
-gpu_id=(6)
-env_id=(HalfCheetah)
-gin_id=(HalfCheetah)
-seed_id=(5)
-update_every_id=(1)
+# gpu_id=(7 7)
+# env_id=(Walker2d Walker2d)
+# gin_id=(Walker2d Walker2d)
+# seed_id=(1 1)
+# update_every_id=(5 40)
+
+# gpu_id=(5 5 5 5 5 5)
+# env_id=(Ant Ant Ant Ant Ant Ant)
+# gin_id=(Ant Ant Ant Ant Ant Ant)
+# seed_id=(1 1 1 1 1 1)
+# update_every_id=(2 5 40 80 150 200)
+
+gpu_id=(4 4 4 4)
+env_id=(Swimmer Swimmer Swimmer Swimmer)
+gin_id=(Swimmer Swimmer Swimmer Swimmer)
+seed_id=(0 0 0 0)
+update_every_id=(40 80 150 200)
+
 
 # gpu_id=(4 4 4)
 # env_id=(Hopper Walker2d Ant)

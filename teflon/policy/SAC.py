@@ -168,7 +168,8 @@ class InferenceProxy(tracking.AutoTrackable):
         return actions
 
 
-@gin.configurable(blacklist=["state_dim", "action_dim", "max_action"])
+# @gin.configurable(blacklist=["state_dim", "action_dim", "max_action"])
+# @gin.configurable
 class SAC(tracking.AutoTrackable):
 
     def __init__(self, state_dim, action_dim, max_action, scale_reward,
