@@ -367,6 +367,7 @@ def main():
             extractor_kwargs = {
                 "dim_state": dim_state, 
                 "dim_action": dim_action, 
+                "dim_output": get_target_dim(env_name),
                 "dim_discretize": args.dim_discretize, 
                 "block": args.block,
                 "fourier_type": args.fourier_type, 

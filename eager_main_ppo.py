@@ -140,8 +140,8 @@ def make_exp_name(args):
         exp_name = exp_name + "_" + args.name
 
     exp_name = exp_name + "_low15-high15-freq-loss"
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
+    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
 
     return exp_name
 
@@ -503,11 +503,17 @@ if __name__ == "__main__":
     misc.set_gpu_device_growth()
 
     args = parse_args()
-    if args.env.startswith('Humanoid'):
-        args.steps = 3000000
-    elif args.env.startswith('Walker2d'):
-        args.steps = 5000000
-    main(args)
+
+    if args.seed == 7:
+        seed_list = [7, 8, 12]
+    elif args.seed == 13:
+        seed_list = [13, 15, 16]
+    else:
+        raise ValueError("Wrong seed {}".format(args.seed))
+
+    for seed in seed_list:
+        args.seed = seed
+        main(args)
     # args.update_every = 1
     # args.tau = 0.005
     # # target_update_freqs = [1000, 500, 800, 1500]

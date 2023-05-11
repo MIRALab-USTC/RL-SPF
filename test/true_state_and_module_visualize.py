@@ -17,6 +17,7 @@ import tensorflow.compat.v1 as tf1
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import pandas as pd
+from scipy.fftpack import fft,ifft
 
 import teflon.util.gin_utils as gin_utils
 from arguments import parse_args
@@ -42,7 +43,7 @@ dir_of_env = {'HalfCheetah-v2': 'hc',
             'Humanoid-v2': 'human'}
 
 # bash test/run_test.sh
-# record state and action data for specific saved model
+# drawing state sequence and true fourier's module
 
 def evaluate_policy(env, policy, eval_episodes=10, record_state=False):
     avg_reward = 0.
@@ -86,7 +87,7 @@ def make_exp_name(args):
             ofe_act = str(ofe_act).split(".")[-1]
 
             ofe_name = make_ofe_name(ofe_layer, ofe_unit, ofe_act, ofe_block)
-            
+
         elif extractor_name == "Munk":
             munk_size = gin.query_parameter("MunkNet.internal_states")
             ofe_name = "Munk_{}".format(munk_size)
@@ -106,9 +107,9 @@ def make_exp_name(args):
 
         if args.use_projection == True:
             exp_name = exp_name + "_P" + str(args.projection_dim)
-
+    
     if args.cosine_similarity == True:
-        exp_name = exp_name + "_ConsineLoss"
+        exp_name = exp_name + "_CosineLoss"
     else:
         exp_name = exp_name + "_L2Loss"
 
@@ -223,7 +224,6 @@ def main():
         sys.exit(-1)
 
     # env_names = ['HalfCheetah-v2', 'Walker2d-v2', 'Hopper-v2', 'Ant-v2', 'Swimmer-v2', 'Humanoid-v2']
-    # env_names = ['Humanoid-v2']
     env_names = args.env
 
     for env_name in env_names:
@@ -256,6 +256,7 @@ def main():
         extractor_kwargs = {
             "dim_state": dim_state, 
             "dim_action": dim_action, 
+            "dim_output": get_target_dim(env_name),
             "dim_discretize": args.dim_discretize, 
             "fourier_type": args.fourier_type, 
             "discount": args.discount, 
@@ -302,12 +303,12 @@ def main():
             for i in range(2):
 
                 tf.summary.experimental.set_step(i - args.pre_train_step)
-                sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
-                    batch_size=batch_size)
-                sample_next_actions = [env.action_space.sample() for k in range(batch_size)]
-                
-                pred_loss, pred_re_loss, pred_im_loss, grads_proj, grads_pred = extractor.train(extractor_target, sample_states, sample_actions, sample_next_states, sample_next_actions, sample_dones)
-                
+                    sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
+                        batch_size=batch_size)
+                    sample_next_actions = [env.action_space.sample() for k in range(batch_size)]
+                    
+                    pred_loss, pred_re_loss, pred_im_loss, grads_proj, grads_pred = extractor.train(extractor_target, sample_states, sample_actions, sample_next_states, sample_next_actions, sample_dones)
+
             print("OFENet Projection's network structure:")
             tvars = extractor.projection.trainable_variables
             for var in tvars:
@@ -317,7 +318,7 @@ def main():
         dir_log = make_output_dir(dir_root=dir_root, exp_name=exp_name, env_name=env_name, 
                                             seed=seed, ignore_errors=args.force)
         model_save_dir = os.path.join(dir_log, 'model')
-        algo = ''
+        algo = ''  
         if 'ofePaper' in model_save_dir:
             algo = 'ofePaper'
             # Load extractor
@@ -334,7 +335,7 @@ def main():
         
         elif 'raw' in model_save_dir:
             algo = 'raw'
-            # Load extractor
+             # Load extractor
             extractor = DummyFeatureExtractor(dim_state=dim_state, dim_action=dim_action)
             logger.info("Feature extractor's model has been loaded.")
 
@@ -363,51 +364,123 @@ def main():
 
         img_save_dir = './test/img_ablation/periodicity'
         img_save_sub_dir = policy_name + '-' + algo + '-' + dir_of_env[env_name]
-        if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir)):
-            os.mkdir(os.path.join(img_save_dir, img_save_sub_dir))
 
-        if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir, 'states')):
-            os.mkdir(os.path.join(img_save_dir, img_save_sub_dir, 'states'))
-
-        if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir, 'actions')):
-            os.mkdir(os.path.join(img_save_dir, img_save_sub_dir, 'actions'))
-
-        # test model
-        _, average_length, state_list, action_list = evaluate_policy(eval_env, policy, eval_episodes=1, record_state = True)
-        start = 0  # int(average_length) - 800
-        end = int(average_length) - 1  # int(average_length) - 1
-
-        data = pd.DataFrame()
-        for i in range(dim_state):
-            # fig, ax = plt.subplots()
-            # logger.info('Drawing {}\'s state{}\n'.format(env_name.split("-")[0], i))
-
-            # ax.plot(np.arange(start, end + 1), state_list[start: end + 1, i])
-            # ax.set_xlabel('InterStep')
-            # ax.set_ylabel('state{}'.format(i))
-            # ax.set_title('{}\'s state{} in an episode'.format(env_name.split("-")[0], i))
-            # ax.legend(['state{}'.format(i)])
-
-            # plt.savefig(os.path.join(img_save_dir, img_save_sub_dir, 'states', '{}_state{}'.format(dir_of_env[env_name], i)), dpi=300)
-            # plt.close ('all')
-            data.insert(loc = len(data.columns), column='state{}'.format(i), value = state_list[0: int(average_length), i])
-
-        for i in range(dim_action):
-            # fig, ax = plt.subplots()
-            # logger.info('Drawing {}\'s action{}\n'.format(env_name.split("-")[0], i))
-
-            # ax.plot(np.arange(start, end + 1), action_list[start: end + 1, i])
-            # ax.set_xlabel('InterStep')
-            # ax.set_ylabel('action{}'.format(i))
-            # ax.set_title('{}\'s action{} in an episode'.format(env_name.split("-")[0], i))
-            # ax.legend(['action{}'.format(i)])
-
-            # plt.savefig(os.path.join(img_save_dir, img_save_sub_dir, 'actions', '{}_action{}'.format(dir_of_env[env_name], i)), dpi=300)
-            # plt.close ('all')
-            data.insert(loc = len(data.columns), column='action{}'.format(i), value = action_list[0: int(average_length), i])
-
-        data.to_csv(os.path.join(img_save_dir, img_save_sub_dir,  '{}_state_action_data.csv'.format(dir_of_env[env_name])))
         
+        # test model
+        try:
+            exp_data = pd.read_csv(os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name])))  # pd.read_csv读取以逗号为分割符的文件
+        except:
+            print('Could not read from %s'%os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name])))
+            continue
+
+        exp_data_len = len(exp_data)
+        horizon = 200
+        s_future_data = tf.cast(np.array(exp_data.iloc[exp_data_len - horizon + 1: exp_data_len, 1: dim_state + 1]), dtype=tf.float32)
+        # input = exp_data.iloc[exp_data_len - horizon].values.tolist()
+        input_s = np.array(exp_data.iloc[[exp_data_len - horizon], 1: dim_state + 1])
+        input_a = np.array(exp_data.iloc[[exp_data_len - horizon], dim_state + 1: dim_state + dim_action + 1])
+
+        with tf.device("/gpu:{}".format(0)):
+            fourier_pred_re, fourier_pred_im = extractor([input_s, input_a])
+            fourier_pred_re = np.squeeze(fourier_pred_re)
+            fourier_pred_im = np.squeeze(fourier_pred_im)
+
+            con_gamma = tf.cast(np.diag([pow(args.discount, k) for k in range(horizon - 1)]), dtype=tf.float32)
+            end = int(args.dim_discretize*0.5 + 1)  # predict fourier function in [0,\pi]
+            ratio = 2 * np.pi / args.dim_discretize
+            con = tf.matmul(tf.cast(ratio * np.expand_dims(np.arange(end), axis=1), dtype=tf.float32), \
+                            tf.cast(np.expand_dims(np.arange(horizon - 1), axis=0), dtype=tf.float32))
+
+            con_re = tf.math.cos(con)
+            con_im = - tf.math.sin(con)
+            fourier_true_re = tf.matmul(tf.matmul(con_re, con_gamma), s_future_data)
+            fourier_true_im = tf.matmul(tf.matmul(con_im, con_gamma), s_future_data)
+
+            z = tf.complex(fourier_pred_re, fourier_pred_im)
+            fourier_pred_mod = np.abs(z) / (horizon / 2)
+            fourier_pred_angle = np.angle(z)
+
+            z = tf.complex(fourier_true_re, fourier_true_im)
+            fourier_true_mod = np.abs(z) / horizon
+            for i in range(dim_state):
+                if env_name == 'Humanoid-v2' and np.amax(fourier_true_mod[:, i]) > 0.005:
+                    fourier_true_mod[:, i] = fourier_true_mod[:, i] / np.amax(fourier_true_mod[:, i]) * 0.5
+                elif np.amax(fourier_true_mod[:, i]) > 0.1:
+                    fourier_true_mod[:, i] = fourier_true_mod[:, i] / np.amax(fourier_true_mod[:, i]) * 0.1
+            fourier_true_angle = np.angle(z)
+
+            # fft_s_future = fft(s_future_data)
+            # abs_fs = np.abs(fft_s_future)
+            # angle_fs = np.angle(fft_s_future)
+            # normalization_fs = abs_fs / horizon
+
+            fourier_error_mod = fourier_true_mod - fourier_pred_mod
+            fourier_error_angle = fourier_true_angle - fourier_pred_angle
+
+            # fourier_pred_re_proj = extractor.projection(fourier_pred_re)
+            # fourier_pred_im_proj = extractor.projection(fourier_pred_im)
+            # fourier_true_re_proj = extractor.projection(fourier_true_re)
+            # fourier_true_im_proj = extractor.projection(fourier_true_im)
+
+            # loss_fun = tf.keras.losses.CosineSimilarity(axis=-1)
+            # fourier_csError_re = loss_fun(fourier_pred_re_proj, fourier_true_re_proj)
+            # fourier_csError_im = loss_fun(fourier_pred_im_proj, fourier_true_im_proj)
+
+        # types = ['true', 'error']
+        types = ['true']
+        complex_types = ['module']
+        # complex_types = ['module', 'angle']
+        for complex_type in complex_types:
+            
+            for type0 in types:
+                
+                if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir, '{}_fourier_{}'.format(type0, complex_type))):
+                    os.mkdir(os.path.join(img_save_dir, img_save_sub_dir, '{}_fourier_{}'.format(type0, complex_type)))
+
+                for i in range(dim_state):
+                    fig, ax = plt.subplots()
+                    logger.info('Drawing {}\'s state{}\'s {} fourier {}\n'.format(env_name.split("-")[0], i, type0, complex_type))
+
+                    if complex_type == 'module':
+                        if type0 == 'true and predicted':
+                            ax.plot(ratio * np.arange(end), fourier_true_mod[:, i])
+                            # ax.plot(ratio * np.arange(end), fourier_pred_mod[:, i])
+                            # ax.legend(['true', 'pred'])
+                            # plt.ylim((0, 0.1))
+                        elif type0 == 'error':
+                            ax.plot(ratio * np.arange(end), fourier_error_mod[:, i])
+                            ax.legend(['error'])
+
+                    elif complex_type == 'angle':
+                        if type0 == 'true and predicted':
+                            ax.plot(ratio * np.arange(end), fourier_true_angle[:, i])
+                            # ax.plot(ratio * np.arange(end), fourier_pred_angle[:, i])
+                            # ax.legend(['true', 'pred'])
+                        elif type0 == 'error':
+                            ax.plot(ratio * np.arange(end), fourier_error_angle[:, i])
+                            ax.legend(['error'])
+                    
+                    ax.set_xlabel('Omega')
+                    ax.set_ylabel('state{}\'s fourier {}'.format(i, complex_type))
+                    ax.set_title('{}\'s state{} FT {} of the last {} states in an episode'.format(env_name.split("-")[0], i, complex_type, horizon))
+
+                    plt.savefig(os.path.join(img_save_dir, img_save_sub_dir, '{}_fourier_{}'.format(type0, complex_type), '{}_state{}\'s_{}_fourier_{}'.format(dir_of_env[env_name], i, type0, complex_type)), dpi=300)
+                    plt.close ('all')
+
+        # drawing states
+        for i in range(dim_state):
+            fig, ax = plt.subplots()
+            logger.info('Drawing {}\'s state{}\n'.format(env_name.split("-")[0], i))
+
+            ax.plot(np.arange(exp_data_len - horizon + 1: exp_data_len), s_future_data[:, i])
+            ax.set_xlabel('InterStep')
+            ax.set_ylabel('state{}'.format(i))
+            ax.set_title('{}\'s state{} in an episode'.format(env_name.split("-")[0], i))
+            ax.legend(['state{}'.format(i)])
+
+            plt.savefig(os.path.join(img_save_dir, img_save_sub_dir, 'states', '{}_state{}'.format(dir_of_env[env_name], i)), dpi=300)
+            plt.close ('all')
+            
         logger.info('Done')
 
 

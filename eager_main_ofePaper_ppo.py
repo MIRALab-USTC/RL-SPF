@@ -91,8 +91,10 @@ def make_exp_name(args):
     if args.name is not None:
         exp_name = exp_name + "_" + args.name
 
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
+    exp_name += "_up{}".format(str(args.update_every))
+
+    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
 
     return exp_name
 
@@ -166,7 +168,7 @@ def feature_extractor(env_name, dim_state, dim_action, name=None, skip_action_br
     return extractor
 
 
-def main():
+def main(args):
     logger = logging.Logger(name="main")
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
@@ -174,26 +176,6 @@ def main():
                                            datefmt="%m/%d %I:%M:%S"))
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--policy", default="DDPG")
-    parser.add_argument("--env", default="HalfCheetah-v2")
-    parser.add_argument("--seed", default=0, type=int)
-    parser.add_argument('--cpu', type=int, default=4)
-    parser.add_argument("--steps", default=1000000, type=int)
-    parser.add_argument("--sac-units", default=256, type=int)
-    parser.add_argument("--batch_size", default=256, type=int)
-    parser.add_argument("--gin", default=None)
-    parser.add_argument("--name", default=None, type=str)
-    parser.add_argument("--force", default=False, action="store_true",
-                        help="remove existed directory")
-    parser.add_argument("--dir-root", default="output", type=str)
-    parser.add_argument("--save_model", default=False, action="store_true")
-    parser.add_argument("--save_freq", default=100000, type=int)
-    parser.add_argument("--steps_per_epoch", default=4000, type=int)
-    parser.add_argument("--lam", default=0.97, type=float)
-    parser.add_argument("--discount", default=0.99, type=float)
-    args = parser.parse_args()
 
     # CONSTANTS
     if args.gin is not None:
@@ -360,9 +342,8 @@ def main():
             episode_timesteps = 0
             episode_return = 0
 
-        update_every = 1
-        if args.gin is not None and cur_steps % update_every == 0:
-            for j in range(update_every):
+        if args.gin is not None and cur_steps % args.update_every == 0:
+            for _ in range(args.update_every):
                 sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
                     batch_size=batch_size)
                 extractor.train(sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones)
@@ -408,4 +389,34 @@ if __name__ == "__main__":
                         format='%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
                         )
 
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--policy", default="DDPG")
+    parser.add_argument("--env", default="HalfCheetah-v2")
+    parser.add_argument("--seed", default=0, type=int)
+    parser.add_argument('--cpu', type=int, default=4)
+    parser.add_argument("--steps", default=1000000, type=int)
+    parser.add_argument("--sac-units", default=256, type=int)
+    parser.add_argument("--batch_size", default=256, type=int)
+    parser.add_argument("--gin", default=None)
+    parser.add_argument("--name", default=None, type=str)
+    parser.add_argument("--force", default=False, action="store_true",
+                        help="remove existed directory")
+    parser.add_argument("--dir-root", default="output", type=str)
+    parser.add_argument("--save_model", default=False, action="store_true")
+    parser.add_argument("--save_freq", default=100000, type=int)
+    parser.add_argument("--steps_per_epoch", default=4000, type=int)
+    parser.add_argument("--lam", default=0.97, type=float)
+    parser.add_argument("--discount", default=0.99, type=float)
+    parser.add_argument("--update_every", default=1, type=int)
+    args = parser.parse_args()
+
+    if args.seed == 7:
+        seed_list = [7, 8, 12]
+    elif args.seed == 13:
+        seed_list = [13, 15, 16]
+    else:
+        raise ValueError("Wrong seed {}".format(args.seed))
+
+    for seed in seed_list:
+        args.seed = seed
+        main(args)

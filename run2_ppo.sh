@@ -1,6 +1,6 @@
 algo=PPO
 
-# gpu_id=(7 2 5 4 3 6)
+# gpu_id=(7 7 7 6 6 4)
 # env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 # gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 # seed_id=(0 0 0 0 0 0)
@@ -18,11 +18,30 @@ algo=PPO
 # seed_id=(0) 
 
 
-# gpu_id=(6 6 6 6)
-# env_id=(HalfCheetah HalfCheetah HalfCheetah HalfCheetah)
-# gin_id=(HalfCheetah HalfCheetah HalfCheetah HalfCheetah)
-# seed_id=(5 5 5 5)
-# update_every_id=(1 2 5 40)
+# gpu_id=(7 7 7 6 6 6 4)
+# env_id=(HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah)
+# gin_id=(HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah HalfCheetah)
+# seed_id=(0 7 8 12 13 15 16)
+# update_every_id=(5 5 5 5 5 5 5)
+
+# just for OFE bellow
+# gpu_id=(5 5 5 5)
+# env_id=(HalfCheetah Hopper Swimmer Walker2d)
+# gin_id=(HalfCheetah Hopper Swimmer Walker2d)
+# seed_id=(5 0 0 1)
+# update_every_id=(5 150 200 2)
+
+# gpu_id=(4 4 3 2 1 0 5)
+# env_id=(Ant Ant Ant Ant Ant Ant Ant)
+# gin_id=(Ant Ant Ant Ant Ant Ant Ant)
+# seed_id=(0 7 8 12 13 15 16)
+# update_every_id=(150 150 150 150 150 150 150)
+
+gpu_id=(3 2)
+env_id=(Hopper Hopper)
+gin_id=(Hopper Hopper)
+seed_id=(7 13)
+update_every_id=(150 150)
 
 # gpu_id=(7 7)
 # env_id=(Walker2d Walker2d)
@@ -36,11 +55,11 @@ algo=PPO
 # seed_id=(1 1 1 1 1 1)
 # update_every_id=(2 5 40 80 150 200)
 
-gpu_id=(4 4 4 4)
-env_id=(Swimmer Swimmer Swimmer Swimmer)
-gin_id=(Swimmer Swimmer Swimmer Swimmer)
-seed_id=(0 0 0 0)
-update_every_id=(40 80 150 200)
+# gpu_id=(4 4 4 4)
+# env_id=(Swimmer Swimmer Swimmer Swimmer)
+# gin_id=(Swimmer Swimmer Swimmer Swimmer)
+# seed_id=(0 0 0 0)
+# update_every_id=(40 80 150 200)
 
 
 # gpu_id=(4 4 4)
@@ -71,14 +90,15 @@ do
                     --remark "tf-${env_id[i]}, FoSta, ppo, max_step=3000000" \
                     > ./my_log/exp_${algo}_${env_id[i]}_fourier_s${seed_id[i]}_up${update_every_id[i]}.log 2>&1 &
 
-    # CUDA_VISIBLE_DEVICES=${gpu_id[i]} python -u eager_main_ofePaper_ppo.py \
-    #                 --policy ${algo} \
-    #                 --env ${env_id[i]}-v2 \
-    #                 --gin ./gins_${algo}/${gin_id[i]}.gin \
-    #                 --seed ${seed_id[i]} \
-    #                 --save_model \
-    #                 --dir-root "./output_${algo}" \
-    #                 > ./my_log/exp_${algo}_${env_id[i]}_ofePaper_s${seed_id[i]}.log 2>&1 &
+    CUDA_VISIBLE_DEVICES=${gpu_id[i]} python -u eager_main_ofePaper_ppo.py \
+                    --policy ${algo} \
+                    --env ${env_id[i]}-v2 \
+                    --gin ./gins_${algo}/${gin_id[i]}.gin \
+                    --seed ${seed_id[i]} \
+                    --save_model \
+                    --update_every ${update_every_id[i]} \
+                    --dir-root "./output_${algo}" \
+                    > ./my_log/exp_${algo}_${env_id[i]}_ofePaper_s${seed_id[i]}_up${update_every_id[i]}.log 2>&1 &
 
     # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper_ppo.py \
     #                 --policy ${algo} \
