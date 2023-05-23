@@ -108,7 +108,7 @@ def make_exp_name(args):
             exp_name = exp_name + "_P" + str(args.projection_dim)
 
     if args.cosine_similarity == True:
-        exp_name = exp_name + "_ConsineLoss"
+        exp_name = exp_name + "_CosineLoss"
     else:
         exp_name = exp_name + "_L2Loss"
 
@@ -119,6 +119,36 @@ def make_exp_name(args):
 
     return exp_name
 
+def make_exp_name_ofePaper(args):
+    if args.gin is not None:
+        extractor_name = gin.query_parameter("feature_extractor.name")
+
+        if extractor_name == "OFE":
+            ofe_unit = gin.query_parameter("OFENet.total_units")
+            ofe_layer = gin.query_parameter("OFENet.num_layers")
+            ofe_act = gin.query_parameter("OFENet.activation")
+            ofe_block = gin.query_parameter("OFENet.block")
+            ofe_act = str(ofe_act).split(".")[-1]
+
+            ofe_name = make_ofe_name(ofe_layer, ofe_unit, ofe_act, ofe_block)
+        elif extractor_name == "Munk":
+            munk_size = gin.query_parameter("MunkNet.internal_states")
+            ofe_name = "Munk_{}".format(munk_size)
+        else:
+            raise ValueError("invalid extractor name {}".format(extractor_name))
+
+        ofe_name = 'ofePaper_' + ofe_name
+    else:
+        ofe_name = "raw"
+
+    env_name = args.env.split("-")[0]
+    exp_name = "{}_{}_{}".format(env_name, args.policy, ofe_name)
+
+    if args.name is not None:
+        exp_name = exp_name + "_" + args.name
+
+
+    return exp_name
 
 def make_policy(policy, env_name, extractor, units=256):
     env = gym.make(env_name)
@@ -224,7 +254,7 @@ def main():
 
     # env_names = ['HalfCheetah-v2', 'Walker2d-v2', 'Hopper-v2', 'Ant-v2', 'Swimmer-v2', 'Humanoid-v2']
     # env_names = ['Humanoid-v2']
-    env_names = args.env
+    env_names = [args.env]
 
     for env_name in env_names:
         # CONSTANTS
@@ -238,14 +268,15 @@ def main():
         dir_root = args.dir_root
         seed = args.seed
 
-        exp_name = make_exp_name(args)
+        # exp_name = make_exp_name(args)
+        exp_name = make_exp_name_ofePaper(args)
 
         env = gym.make(env_name)
         eval_env = gym.make(env_name)
 
         # Set seeds
         env.seed(seed)
-        eval_env.seed(seed + 1000)
+        eval_env.seed(seed + 1001)
         # tf.set_random_seed(seed)
         tf.random.set_seed(seed)
         np.random.seed(seed)
@@ -256,6 +287,7 @@ def main():
         extractor_kwargs = {
             "dim_state": dim_state, 
             "dim_action": dim_action, 
+            "dim_output": get_target_dim(env_name),
             "dim_discretize": args.dim_discretize, 
             "fourier_type": args.fourier_type, 
             "discount": args.discount, 
@@ -275,43 +307,43 @@ def main():
 
         logger.info("collecting random {} transitions".format(args.random_collect))
 
-        print("Initialization: I am collecting samples randomly!")
-        for i in range(args.random_collect):
-            action = env.action_space.sample()
-            next_state, reward, done, _ = env.step(action)
+        # print("Initialization: I am collecting samples randomly!")
+        # for i in range(args.random_collect):
+        #     action = env.action_space.sample()
+        #     next_state, reward, done, _ = env.step(action)
 
-            episode_return += reward
-            episode_timesteps += 1
-            total_timesteps += 1
+        #     episode_return += reward
+        #     episode_timesteps += 1
+        #     total_timesteps += 1
 
-            done_flag = done
-            if episode_timesteps == env._max_episode_steps:
-                done_flag = False
+        #     done_flag = done
+        #     if episode_timesteps == env._max_episode_steps:
+        #         done_flag = False
 
-            replay_buffer.add(state=state, action=action, next_state=next_state, reward=reward, done=done_flag)
-            state = next_state
+        #     replay_buffer.add(state=state, action=action, next_state=next_state, reward=reward, done=done_flag)
+        #     state = next_state
 
-            if done:
-                state = env.reset()
-                episode_timesteps = 0
-                episode_return = 0
+        #     if done:
+        #         state = env.reset()
+        #         episode_timesteps = 0
+        #         episode_return = 0
 
-        # pretraining the extractor, extractor's trainable variables are incomplete until the extractor has been trained once.
-        if args.gin is not None:
-            print("Pretrain: I am pretraining the extractor!")
-            for i in range(2):
+        # # pretraining the extractor, extractor's trainable variables are incomplete until the extractor has been trained once.
+        # if args.gin is not None:
+        #     print("Pretrain: I am pretraining the extractor!")
+        #     for i in range(2):
 
-                tf.summary.experimental.set_step(i - args.pre_train_step)
-                sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
-                    batch_size=batch_size)
-                sample_next_actions = [env.action_space.sample() for k in range(batch_size)]
+        #         tf.summary.experimental.set_step(i - args.pre_train_step)
+        #         sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
+        #             batch_size=batch_size)
+        #         sample_next_actions = [env.action_space.sample() for k in range(batch_size)]
                 
-                pred_loss, pred_re_loss, pred_im_loss, grads_proj, grads_pred = extractor.train(extractor_target, sample_states, sample_actions, sample_next_states, sample_next_actions, sample_dones)
+        #         pred_loss, pred_re_loss, pred_im_loss, grads_proj, grads_pred = extractor.train(extractor_target, sample_states, sample_actions, sample_next_states, sample_next_actions, sample_dones)
                 
-            print("OFENet Projection's network structure:")
-            tvars = extractor.projection.trainable_variables
-            for var in tvars:
-                print(" name = %s, shape = %s" % (var.name, var.shape))
+        #     print("OFENet Projection's network structure:")
+        #     tvars = extractor.projection.trainable_variables
+        #     for var in tvars:
+        #         print(" name = %s, shape = %s" % (var.name, var.shape))
     
         # test model in environme nts with different masses and frictions
         dir_log = make_output_dir(dir_root=dir_root, exp_name=exp_name, env_name=env_name, 

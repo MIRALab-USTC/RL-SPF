@@ -140,8 +140,8 @@ def make_exp_name(args):
         exp_name = exp_name + "_" + args.name
 
     exp_name = exp_name + "_low15-high15-freq-loss"
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
+    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
 
     return exp_name
 
@@ -503,11 +503,15 @@ if __name__ == "__main__":
     misc.set_gpu_device_growth()
 
     args = parse_args()
+<<<<<<< HEAD
     if args.env.startswith('Humanoid'):
         args.steps = 3000000
     elif args.env.startswith('Walker2d'):
         args.steps = 5000000
     
+=======
+
+>>>>>>> ffb8bea7d91e61c84780f178c7529e9e319a72ce
     if args.seed == 7:
         seed_list = [7, 8, 12]
     elif args.seed == 13:
@@ -518,3 +522,19 @@ if __name__ == "__main__":
     for seed in seed_list:
         args.seed = seed
         main(args)
+<<<<<<< HEAD
+=======
+    # args.update_every = 1
+    # args.tau = 0.005
+    # # target_update_freqs = [1000, 500, 800, 1500]
+    # # target_update_freqs = [2000, 3000, 4000, 5000]
+    # target_update_freqs = [6000, 8000, 10000, 15000]
+    # for target_update_freq in target_update_freqs:
+    #     args.target_update_freq = target_update_freq
+    #     main(args)
+
+    # update_everys = [5, 40, 80, 150, 200, 500]
+    # for update_every in update_everys:
+    #     args.update_every = update_every
+    #     main(args)
+>>>>>>> ffb8bea7d91e61c84780f178c7529e9e319a72ce

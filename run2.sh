@@ -44,7 +44,7 @@ do
                     --tau 0.01 \
                     --save_model \
                     --dir-root "./output_${algo}" \
-                    --remark "tf-${env_id[i]}, FoSta,  update_every and linear noise, weight_init_orthogonal, (400, 300) TD3, tau=0.01, dim_output=292" \
+                    --remark "tf-${env_id[i]}, FoSta,  update_every and linear noise, weight_init_orthogonal,, tau=0.01, dim_output=375" \
                     > ./my_log/exp_${algo}_${env_id[i]}_fourier1.log 2>&1 &
 
     # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper.py \
@@ -54,7 +54,7 @@ do
     #                 --seed ${seed_id[i]} \
     #                 --save_model \
     #                 --dir-root "./output_${algo}" \
-    #                 > ./my_log/exp_${algo}_${env_id[i]}_ofePaper2.log 2>&1 &
+    #                 > ./my_log/exp_${algo}_${env_id[i]}_ofePaper1.log 2>&1 &
 
     # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper.py \
     #                 --policy ${algo} \
@@ -62,6 +62,6 @@ do
     #                 --seed ${seed_id[i]} \
     #                 --save_model \
     #                 --dir-root "./output_${algo}" \
-    #                 > ./my_log/exp_${algo}_${env_id[i]}_raw2.log 2>&1 &
+    #                 > ./my_log/exp_${algo}_${env_id[i]}_raw1.log 2>&1 &
     
 done

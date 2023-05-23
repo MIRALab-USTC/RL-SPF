@@ -109,7 +109,7 @@ def make_exp_name(args):
             exp_name = exp_name + "_P" + str(args.projection_dim)
 
     if args.cosine_similarity == True:
-        exp_name = exp_name + "_ConsineLoss"
+        exp_name = exp_name + "_CosineLoss"
     else:
         exp_name = exp_name + "_L2Loss"
 
@@ -257,6 +257,7 @@ def main():
         extractor_kwargs = {
             "dim_state": dim_state, 
             "dim_action": dim_action, 
+            "dim_output": get_target_dim(env_name),
             "dim_discretize": args.dim_discretize, 
             "fourier_type": args.fourier_type, 
             "discount": args.discount, 
