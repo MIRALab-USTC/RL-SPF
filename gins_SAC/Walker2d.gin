@@ -1,6 +1,0 @@
-feature_extractor.name = "OFE"
-OFENet.total_units = 240
-OFENet.num_layers = 6
-OFENet.activation = @swish
-OFENet.block = "densenet"
-OFENet.batchnorm = True

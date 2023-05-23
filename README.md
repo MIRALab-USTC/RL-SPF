@@ -8,8 +8,8 @@ we used in our paper. We ran these codes on Ubuntu 18.04 & GeForce 1060.
 ## Requirement
 
 ```bash
-$ conda create -n teflon python=3.6 anaconda
-$ conda activate teflon
+$ conda create -n src python=3.6 anaconda
+$ conda activate src
 $ conda install cudatoolkit=10.0 cudnn tensorflow-gpu==2.0.0
 $ pip install -r requirements.txt
 ```
@@ -34,7 +34,7 @@ To train an agent with OFENet, run the below commands at the project root.
 
 ```bash
 $ export PYTHONPATH=.
-$ python3 teflon/tool/eager_main.py --policy SAC \
+$ python3 src/tool/eager_main.py --policy SAC \
                                   --env HalfCheetah-v2 \
                                   --gin ./gins/HalfCheetah.gin \
                                   --seed 0
@@ -44,7 +44,7 @@ If you want to combine OFENet with TD3 or DDPG, change the policy like
 
 ```bash
 $ export PYTHONPATH=.
-$ python3 teflon/tool/eager_main.py --policy TD3 \
+$ python3 src/tool/eager_main.py --policy TD3 \
                                   --env HalfCheetah-v2 \
                                   --gin ./gins/HalfCheetah.gin \
                                   --seed 0
@@ -54,7 +54,7 @@ When you want to run an agent in another environment, change the policy and
 the hyperparameter file (.gin).
 
 ```bash
-$ python3 teflon/tool/eager_main.py --policy SAC \
+$ python3 src/tool/eager_main.py --policy SAC \
                                   --env Walker2d-v2  \
                                   --gin ./gins/Walker2d.gin \
                                   --seed 0
@@ -63,7 +63,7 @@ $ python3 teflon/tool/eager_main.py --policy SAC \
 When you don't specify a gin file, you train an agent with raw observations. 
 
 ```bash
-$ python3 teflon/tool/eager_main.py --policy SAC \
+$ python3 src/tool/eager_main.py --policy SAC \
                                   --env HalfCheetah-v2 \
                                   --seed 0
 ```
@@ -71,7 +71,7 @@ $ python3 teflon/tool/eager_main.py --policy SAC \
 ML-SAC is trained with the below command.
 
 ```bash
-$ python3 teflon/tool/eager_main.py --policy SAC \
+$ python3 src/tool/eager_main.py --policy SAC \
                                   --env HalfCheetah-v2 \
                                   --gin ./gins/Munk.gin \
                                   --seed 0

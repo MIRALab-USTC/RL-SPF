@@ -1,9 +1,3 @@
-# Copyright (c) 2020 Mitsubishi Electric Research Laboratories (MERL). All rights reserved.
-
-# The software, documentation and/or data in this file is provided on an "as is" basis, and MERL has no obligations to provide maintenance, support, updates, enhancements or modifications. MERL specifically disclaims any warranties, including, but not limited to, the implied warranties of merchantability and fitness for any particular purpose. In no event shall MERL be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of this software and its documentation, even if MERL has been advised of the possibility of such damages.
-
-# As more fully described in the license agreement that was required in order to download this software, documentation and/or data, permission to use, copy and modify this software without fee is granted, but only for educational, research and non-commercial purposes.
-
 import argparse
 import logging
 import os
@@ -20,17 +14,17 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import datetime, pytz
 
-import teflon.util.gin_utils as gin_utils
-from teflon.ofe.dummy_extractor import DummyFeatureExtractor
-from teflon.ofe.munk_extractor import MunkNet
-from teflon.ofe.network import OFENet
-from teflon.policy import DDPG
-from teflon.policy import PPO
-from teflon.policy import SAC
-from teflon.policy import TD3, TD3_linear
-from teflon.util import misc
-from teflon.util import replay
-from teflon.util.misc import get_target_dim, make_ofe_name, get_default_steps
+import src.util.gin_utils as gin_utils
+from src.aux.dummy_extractor import DummyFeatureExtractor
+from src.aux.munk_extractor import MunkNet
+from src.aux.network import OFENet
+from src.policy import DDPG
+from src.policy import PPO
+from src.policy import SAC
+from src.policy import TD3
+from src.util import misc
+from src.util import replay
+from src.util.misc import get_target_dim, make_ofe_name, get_default_steps
 import trfl.target_update_ops as target_update
 from arguments import parse_args
 
@@ -42,7 +36,6 @@ dir_of_env = {'HalfCheetah-v2': 'hc',
             'Swimmer-v2': 'swim', 
             'Humanoid-v2': 'human',
             "InvertedDoublePendulum-v2": 'IDPen'}
-
 
 def evaluate_policy(env, policy, eval_episodes=10):
     avg_reward = 0.
@@ -78,9 +71,6 @@ def make_exp_name(args):
             ofe_act = str(ofe_act).split(".")[-1]
 
             ofe_name = make_ofe_name(ofe_layer, ofe_unit, ofe_act, ofe_block)
-        elif extractor_name == "Munk":
-            munk_size = gin.query_parameter("MunkNet.internal_states")
-            ofe_name = "Munk_{}".format(munk_size)
         else:
             raise ValueError("invalid extractor name {}".format(extractor_name))
     else:
@@ -113,7 +103,7 @@ def make_exp_name(args):
     return exp_name
 
 
-def make_policy(policy, env_name, extractor, units=256, ac_kwargs=dict()):
+def make_policy(policy, env_name, extractor, units=256):
     env = gym.make(env_name)
 
     state_dim = env.observation_space.shape[0]
@@ -140,9 +130,7 @@ def make_policy(policy, env_name, extractor, units=256, ac_kwargs=dict()):
         print("We use TD3 algorithm!")
     elif policy == "TD3small":
         policy = TD3.TD3(state_dim, action_dim, max_action, layer_units=(256, 256), feature_extractor=extractor)
-    elif policy == "TD3linear":
-        policy = TD3_linear.TD3(state_dim, action_dim, max_action, layer_units=(400, 300), feature_extractor=extractor, **ac_kwargs)
-        print("We use TD3linear algorithm!")
+        print("We use TDsmall algorithm!")
     else:
         raise ValueError("invalid policy {}".format(policy))
 
@@ -153,10 +141,10 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
 
     dir_log = os.path.join(dir_root, "log_{}".format(dir_of_env[env_name]), exp_name, seed_name)
 
-    for cur_dir in [dir_log]:  # 如果存在文件名一样的，则递归的删除目录
+    for cur_dir in [dir_log]:  # If the same file name exists, delete the directory recursively
         if os.path.exists(cur_dir):
             if ignore_errors:
-                shutil.rmtree(cur_dir, ignore_errors=True)  # 递归地删除目录
+                shutil.rmtree(cur_dir, ignore_errors=True)  # delete the directory recursively
             else:
                 raise ValueError("output directory {} exists".format(cur_dir))
 
@@ -179,9 +167,6 @@ def feature_extractor(extractor_kwargs=dict(), name=None, skip_action_branch=Fal
         tvars = extractor.trainable_variables
         for var in tvars:
             print(" name = %s, shape = %s" % (var.name, var.shape))
-
-    elif name == "Munk":
-        extractor = MunkNet(dim_state=dim_state, dim_action=dim_action)
     else:
         extractor = DummyFeatureExtractor(dim_state=dim_state, dim_action=dim_action)
 
@@ -244,18 +229,17 @@ def main(args):
         "dim_action": dim_action, 
         "dim_output": get_target_dim(env_name),
         "dim_discretize": args.dim_discretize, 
-        # "block": args.block,
         "fourier_type": args.fourier_type, 
         "discount": args.discount, 
         "use_projection": args.use_projection, 
         "projection_dim": args.projection_dim, 
         "cosine_similarity": args.cosine_similarity,
+        "normalizer": args.normalizer
     }
     extractor, extractor_target = feature_extractor(extractor_kwargs=extractor_kwargs)
 
 
     # Makes a summary writer before graph construction
-    # https://github.com/tensorflow/tensorflow/issues/26409
     writer = tf.summary.create_file_writer(dir_log)
     writer.set_as_default()
 
@@ -266,10 +250,7 @@ def main(args):
     )
 
     # Initialize policy
-    ac_kwargs = {
-        "linear_range":args.td3_linear_range,
-    }
-    policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units, ac_kwargs=ac_kwargs)
+    policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units)
 
     replay_buffer = replay.ReplayBuffer(state_dim=dim_state, action_dim=dim_action, capacity=1000000)
 
@@ -362,14 +343,12 @@ def main(args):
                         tf.summary.scalar(name="loss/predictor_Loss", data=pred_loss)
                         tf.summary.scalar(name="loss/predictor_Re_Loss", data=pred_re_loss)
                         tf.summary.scalar(name="loss/predictor_Im_Loss", data=pred_im_loss)
-                        # tf.summary.scalar(name="loss/predictor_Inv_Loss", data=inv_loss)
 
                 episode_timesteps = 0
                 episode_return = 0
 
-            # update_every = 50
-            if args.gin is not None:  # cur_steps % update_every == 0:
-                # for j in range(update_every):
+
+            if args.gin is not None:
                 sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
                     batch_size=batch_size)
                 sample_next_actions = policy.select_action_noise(sample_next_states)
@@ -377,8 +356,6 @@ def main(args):
                 if cur_steps % args.target_update_freq == 0:
                     target_update.update_target_variables(extractor_target.weights, extractor.weights, tau=args.tau)
 
-            # if cur_steps % update_every == 0:
-            #     for j in range(update_every):
             policy.train(replay_buffer, batch_size=batch_size)
 
             if cur_steps % args.eval_freq == 0:
@@ -401,14 +378,6 @@ def main(args):
                     tf.summary.scalar(name="loss/predictor_Loss", data=pred_loss)
                     tf.summary.scalar(name="loss/predictor_Re_Loss", data=pred_re_loss)
                     tf.summary.scalar(name="loss/predictor_Im_Loss", data=pred_im_loss)
-                    # tf.summary.scalar(name="loss/predictor_Inv_Loss", data=inv_loss)
-                    # logger.info("Evaluate Time {} : recording gradients".format(int(total_timesteps)))
-                    # for row in range(len(grads_proj)):
-                    #     proj_grads_norm = tf.sqrt(tf.reduce_mean(grads_proj[row]**2))
-                    #     tf.summary.scalar('Gradients/proj_grads_norm{}'.format(row), proj_grads_norm)
-                    # for row in range(len(grads_pred)):
-                    #     pred_grads_norm = tf.sqrt(tf.reduce_mean(grads_pred[row]**2))
-                    #     tf.summary.scalar('Gradients/pred_grads_norm{}'.format(row), pred_grads_norm)
 
                 prev_calc_time = time.time()
                 prev_calc_step = cur_steps
@@ -434,15 +403,4 @@ if __name__ == "__main__":
                         )
 
     args = parse_args()
-    if args.env.startswith('Humanoid'):
-        args.steps = 10000000
     main(args)
-
-    # # seed_list = [0,1,2,5,6]
-    # seed_list = [7,8,10,11,12]
-    # if args.env.startswith('Hopper'):
-    #     seed_list = [5,6,7,8]
-
-    # for seed in seed_list:
-    #     args.seed = seed
-    #     main(args)

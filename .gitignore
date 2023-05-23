@@ -6,6 +6,6 @@ icml
 *output/
 *output*/
 *results/
-*my_log/
 *.png
 all_log/*
+my_log/*

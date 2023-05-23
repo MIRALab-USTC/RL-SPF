@@ -1,5 +1,5 @@
 feature_extractor.name = "OFE"
-OFENet.total_units = 240
+OFENet.total_units = 320
 OFENet.num_layers = 8
 OFENet.activation = @swish
 OFENet.block = "densenet"

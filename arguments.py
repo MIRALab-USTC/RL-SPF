@@ -16,14 +16,11 @@ def parse_args():
     parser.add_argument("--img_save_dir", default='./results/img')
 
     # fourier
-    # parser.add_argument("--block", default="densenet", type=str, choices=['densenet', 'mlp', 'mlp_cat'])
     parser.add_argument("--discount", default=0.99, type=float)
     parser.add_argument("--dim_discretize", default=128, type=int)
-    parser.add_argument("--pred_stoch", default=False, action="store_true",
-                        help="predict the state sequence under the stochastic policy")
     parser.add_argument("--fourier_type", default='dtft', type=str)
-    # parser.add_argument("--original", default=False, action="store_true",
-    #                     help="run original rl policy without ofe and fourier")
+    parser.add_argument("--normalizer", default='layer', type=str, choices=['layer', 'batch'])
+
 
     # loss
     parser.add_argument("--use_projection", default=False, action="store_true")
@@ -58,18 +55,10 @@ def parse_args():
     # ppo
     parser.add_argument("--steps_per_epoch", default=4000, type=int)
     parser.add_argument("--lam", default=0.97, type=float)
-    parser.add_argument('--cpu', type=int, default=4)
     parser.add_argument("--update_every", default=1, type=int)
 
-    # td3
-    parser.add_argument("--td3_linear_range", default=100000, type=int, help='interval of linearly decreasing noise for td3')
 
     parser.add_argument("--remark", default="dtft, use projection")
-    # "dtft, tune the hyperparameter dim_discretize from 128 to 64"
-    # "dtft, after debug: pi -> 2*pi, remove FT network"
-
-    # network_weight
-    parser.add_argument("--weight", default=0.5, type=float)
 
     # get_data
     parser.add_argument("--aux", default="raw", type=str, choices=['raw', 'OFE', 'FSP'])

@@ -1,9 +1,3 @@
-# Copyright (c) 2020 Mitsubishi Electric Research Laboratories (MERL). All rights reserved.
-
-# The software, documentation and/or data in this file is provided on an "as is" basis, and MERL has no obligations to provide maintenance, support, updates, enhancements or modifications. MERL specifically disclaims any warranties, including, but not limited to, the implied warranties of merchantability and fitness for any particular purpose. In no event shall MERL be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of this software and its documentation, even if MERL has been advised of the possibility of such damages.
-
-# As more fully described in the license agreement that was required in order to download this software, documentation and/or data, permission to use, copy and modify this software without fee is granted, but only for educational, research and non-commercial purposes.
-
 import argparse
 import logging
 import os
@@ -17,17 +11,17 @@ import numpy as np
 import tensorflow as tf
 import datetime, pytz
 
-import teflon.util.gin_utils as gin_utils
-from teflon.ofe.dummy_extractor import DummyFeatureExtractor
-from teflon.ofe.munk_extractor import MunkNet
-from teflon.ofe.network_ofePaper import OFENet
-from teflon.policy import DDPG
-from teflon.policy import PPO
-from teflon.policy import SAC
-from teflon.policy import TD3
-from teflon.util import misc
-from teflon.util import replay
-from teflon.util.misc import get_target_dim, make_ofe_name, get_default_steps
+import src.util.gin_utils as gin_utils
+from src.aux.dummy_extractor import DummyFeatureExtractor
+from src.aux.munk_extractor import MunkNet
+from src.aux.network_ofePaper import OFENet
+from src.policy import DDPG
+from src.policy import PPO
+from src.policy import SAC
+from src.policy import TD3
+from src.util import misc
+from src.util import replay
+from src.util.misc import get_target_dim, make_ofe_name, get_default_steps
 
 misc.set_gpu_device_growth()
 dir_of_env = {'HalfCheetah-v2': 'hc', 
@@ -128,10 +122,7 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
     seed_name = "seed{}".format(seed)
 
     dir_log = os.path.join(dir_root, "log_{}".format(dir_of_env[env_name]), exp_name, seed_name)
-    # dir_parameter = os.path.join(dir_root, "parameter", exp_name, seed_name)
-    # dir_export = os.path.join(dir_root, "export_model", exp_name, seed_name)
-
-    # for cur_dir in [dir_log, dir_parameter, dir_export]:
+    
     for cur_dir in [dir_log]:
         if os.path.exists(cur_dir):
             if ignore_errors:
@@ -141,7 +132,6 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
 
         os.makedirs(cur_dir)
 
-    # return dir_log, dir_parameter, dir_export
     return dir_log
 
 
@@ -218,18 +208,12 @@ def main(args):
     extractor = feature_extractor(env_name, dim_state, dim_action)
 
     # Makes a summary writer before graph construction
-    # https://github.com/tensorflow/tensorflow/issues/26409
     writer = tf.summary.create_file_writer(dir_log)
     writer.set_as_default()
 
     policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units)
 
     replay_buffer = replay.ReplayBuffer(state_dim=dim_state, action_dim=dim_action, capacity=1000000)
-
-    # checkpoint = tf.train.Checkpoint(policy=policy)
-    # checkpoint_manager = tf.train.CheckpointManager(checkpoint,
-    #                                                 directory=dir_parameter,
-    #                                                 max_to_keep=1)
 
     gin_utils.write_gin_to_summary(dir_log, global_step=0)
 
@@ -261,7 +245,8 @@ def main(args):
             episode_timesteps = 0
             episode_return = 0
 
-    # pretrainingするように変更
+    # pretraining the extractor
+
     print("Pretrain: I am pretraining the extractor!")
     for i in range(random_collect):
         sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
@@ -368,15 +353,5 @@ if __name__ == "__main__":
     parser.add_argument("--save_freq", default=100000, type=int)
     args = parser.parse_args()
     
-    if args.env.startswith('Humanoid'):
-        args.steps = 10000000
     main(args)
-    # # seed_list = [0,1,2,5,6]
-    # seed_list = [7,8,10,11,12]
-    # # main(args)
-    # if args.env.startswith('Hopper'):
-    #     seed_list = [5,6,7,8]
 
-    # for seed in seed_list:
-    #     args.seed = seed
-    #     main(args)

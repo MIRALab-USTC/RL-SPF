@@ -106,7 +106,7 @@ OFENet's network structure:
  name = FeatureNet/action7/layer_normalization_15/beta:0, shape = (30,)
  name = FeatureNet/feat_out/kernel:0, shape = (503, 17)
  name = FeatureNet/feat_out/bias:0, shape = (17,)
-> [0;32m/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py[0m(127)[0;36m__init__[0;34m()[0m
+> [0;32m/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py[0m(127)[0;36m__init__[0;34m()[0m
 [0;32m    126 [0;31m            [0mipdb[0m[0;34m.[0m[0mset_trace[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
 [0m[0;32m--> 127 [0;31m            self._mu = mlp(
 [0m[0;32m    128 [0;31m[0;34m[0m[0m
@@ -118,15 +118,15 @@ ipdb> Traceback (most recent call last):
     policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units, ac_kwargs=ac_kwargs)
   File "eager_main_ofePaper_ppo.py", line 117, in make_policy
     policy = PPO.PPO(feature_extractor=extractor, **ac_kwargs)
-  File "/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py", line 216, in __init__
+  File "/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py", line 216, in __init__
     self.actor, self.critic = mlp_actor_critic(observation_space, action_space)
-  File "/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py", line 186, in mlp_actor_critic
+  File "/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py", line 186, in mlp_actor_critic
     activation, layer_norm)
-  File "/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py", line 157, in make_actor_continuous
+  File "/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py", line 157, in make_actor_continuous
     activation, layer_norm)
-  File "/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py", line 127, in __init__
+  File "/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py", line 127, in __init__
     self._mu = mlp(
-  File "/home/mxye/new/ofenet_fourier_nips_new/teflon/policy/PPO.py", line 127, in __init__
+  File "/home/mxye/new/ofenet_fourier_nips_new/src/policy/PPO.py", line 127, in __init__
     self._mu = mlp(
   File "/home/mxye/.conda/envs/OFENet0/lib/python3.6/bdb.py", line 51, in trace_dispatch
     return self.dispatch_line(frame)

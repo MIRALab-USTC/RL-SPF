@@ -1,9 +1,3 @@
-# Copyright (c) 2020 Mitsubishi Electric Research Laboratories (MERL). All rights reserved.
-
-# The software, documentation and/or data in this file is provided on an "as is" basis, and MERL has no obligations to provide maintenance, support, updates, enhancements or modifications. MERL specifically disclaims any warranties, including, but not limited to, the implied warranties of merchantability and fitness for any particular purpose. In no event shall MERL be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of this software and its documentation, even if MERL has been advised of the possibility of such damages.
-
-# As more fully described in the license agreement that was required in order to download this software, documentation and/or data, permission to use, copy and modify this software without fee is granted, but only for educational, research and non-commercial purposes.
-
 import argparse
 import logging
 import os
@@ -17,19 +11,17 @@ import numpy as np
 import tensorflow as tf
 import datetime, pytz
 
-import teflon.util.gin_utils as gin_utils
-from teflon.ofe.dummy_extractor import DummyFeatureExtractor
-from teflon.ofe.munk_extractor import MunkNet
-from teflon.ofe.network_ofePaper import OFENet
-from teflon.policy import DDPG
-from teflon.policy import PPO
-from teflon.policy import SAC
-from teflon.policy import TD3
-from teflon.util import misc
-from teflon.util import replay
-from teflon.util.misc import get_target_dim, make_ofe_name, get_default_steps
-from teflon.util.mpi_tf2 import MpiAdamOptimizer, sync_params
-from teflon.util.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_scalar, num_procs, distribute_value
+import src.util.gin_utils as gin_utils
+from src.aux.dummy_extractor import DummyFeatureExtractor
+from src.aux.munk_extractor import MunkNet
+from src.aux.network_ofePaper import OFENet
+from src.policy import DDPG
+from src.policy import PPO
+from src.policy import SAC
+from src.policy import TD3
+from src.util import misc
+from src.util import replay
+from src.util.misc import get_target_dim, make_ofe_name, get_default_steps
 
 misc.set_gpu_device_growth()
 dir_of_env = {'HalfCheetah-v2': 'hc', 
@@ -95,12 +87,11 @@ def make_exp_name(args):
 
     # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
     # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
->>>>>>> ffb8bea7d91e61c84780f178c7529e9e319a72ce
 
     return exp_name
 
 
-def make_policy(policy, env_name, extractor, ac_kwargs, units=256):
+def make_policy(policy, env_name, extractor, units=256):
     env = gym.make(env_name)
 
     state_dim = env.observation_space.shape[0]
@@ -111,8 +102,10 @@ def make_policy(policy, env_name, extractor, ac_kwargs, units=256):
 
     if policy == "SAC":
         scale_reward = SAC.get_default_scale_reward(env_name)
-        policy = SAC.SAC(state_dim, action_dim, max_action, feature_extractor=extractor, scale_reward=scale_reward,
-                         actor_units=n_units, q_units=n_units, v_units=n_units)
+        policy = SAC.SAC(state_dim, action_dim, max_action, 
+                        feature_extractor=extractor, 
+                        scale_reward=scale_reward,
+                        actor_units=n_units, q_units=n_units, v_units=n_units)
         print("We use SAC algorithm!")
     elif policy == "DDPG":
         policy = DDPG.DDPG(state_dim, action_dim, max_action, feature_extractor=extractor)
@@ -191,27 +184,15 @@ def main(args):
         logger.error("eval_freq must be divisible by summary_freq.")
         sys.exit(-1)
 
-    # mpi
-    # mpi_fork(2)  # run parallel code with mpi
-    # seed = args.seed + 10000 * proc_id()
-    seed = args.seed
-    # mpi_num_proc = num_procs()
-    # logger.info('We have {} processes.'.format(mpi_num_proc))
 
-    # In case of distributed computations these values have to be updated
+    seed = args.seed
+
     max_steps = args.steps = get_default_steps(args.env)
     epochs = max_steps // args.steps_per_epoch + 1
-
-    # total_steps = distribute_value(args.steps_per_epoch*epochs, mpi_num_proc)
-    # steps_per_epoch = distribute_value(args.steps_per_epoch, mpi_num_proc)
-    # log_every = distribute_value(args.save_freq, mpi_num_proc)
-    # save_freq = distribute_value(args.save_freq, mpi_num_proc)
 
     total_steps = args.steps_per_epoch*epochs
     steps_per_epoch = args.steps_per_epoch
     save_freq = args.save_freq
-
-    max_steps = args.steps = get_default_steps(args.env)
 
     env_name = args.env
     policy_name = args.policy
@@ -224,9 +205,8 @@ def main(args):
     dir_log = make_output_dir(dir_root=dir_root, exp_name=exp_name, env_name=args.env, seed=seed,
                                              ignore_errors=args.force)
 
-    if proc_id() == 0:
-        eval_env = gym.make(env_name)
-        eval_env.seed(seed + 1000)
+    eval_env = gym.make(env_name)
+    eval_env.seed(seed + 1000)
 
     # Set seeds
     env = gym.make(env_name)
@@ -241,22 +221,11 @@ def main(args):
     extractor = feature_extractor(env_name, dim_state, dim_action)
 
     # Makes a summary writer before graph construction
-    # https://github.com/tensorflow/tensorflow/issues/26409
     writer = tf.summary.create_file_writer(dir_log)
     writer.set_as_default()
 
     # Initialize policy
-    ac_kwargs = {
-        "steps_per_epoch": steps_per_epoch, 
-        "epochs": epochs, 
-        "gamma": args.discount, 
-        "clip_ratio": 0.2, 
-        "pi_lr": 3e-4,
-        "vf_lr": 1e-3, 
-        "observation_space": env.observation_space,
-        "action_space": env.action_space,
-    }
-    policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units, ac_kwargs=ac_kwargs)
+    policy = make_policy(policy=policy_name, env_name=env_name, extractor=extractor, units=args.sac_units)
 
     replay_buffer = replay.PPOBuffer(obs_dim=dim_state, act_dim=dim_action, size=steps_per_epoch, gamma=args.discount, lam=args.lam)
 
@@ -272,7 +241,6 @@ def main(args):
     print("Initialization: I am collecting samples randomly!")
     for i in range(random_collect):
         action = env.action_space.sample()
-        # logp, v_t = policy.get_logp_and_val(state, action)
         next_state, reward, done, _ = env.step(action)
 
         episode_return += reward
@@ -352,7 +320,6 @@ def main(args):
         if (cur_steps + 1) % steps_per_epoch == 0:
             policy.train(replay_buffer)
 
-        # if proc_id() == 0 and cur_steps %eval_freq == 0:
         if cur_steps % eval_freq == 0:
             duration = time.time() - prev_calc_time
             duration_steps = cur_steps - prev_calc_step
@@ -373,7 +340,6 @@ def main(args):
             prev_calc_step = cur_steps
 
         # store model
-        # if proc_id() == 0 and args.save_model == True and cur_steps % save_freq == 0:
         if args.save_model == True and cur_steps % save_freq == 0:
             model_save_dir = os.path.join(dir_log, 'model')
             policy.save(model_save_dir)
@@ -411,13 +377,4 @@ if __name__ == "__main__":
     parser.add_argument("--update_every", default=1, type=int)
     args = parser.parse_args()
 
-    if args.seed == 7:
-        seed_list = [7, 8, 12]
-    elif args.seed == 13:
-        seed_list = [13, 15, 16]
-    else:
-        raise ValueError("Wrong seed {}".format(args.seed))
-
-    for seed in seed_list:
-        args.seed = seed
-        main(args)
+    main(args)
