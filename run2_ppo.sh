@@ -36,11 +36,29 @@ algo=PPO
 # seed_id=(1 1 1 1 1 1)
 # update_every_id=(2 5 40 80 150 200)
 
-gpu_id=(4 4 4 4)
-env_id=(Swimmer Swimmer Swimmer Swimmer)
-gin_id=(Swimmer Swimmer Swimmer Swimmer)
-seed_id=(0 0 0 0)
-update_every_id=(40 80 150 200)
+# gpu_id=(4 4 4 4)
+# env_id=(Humanoid Humanoid Humanoid Humanoid)
+# gin_id=(Humanoid Humanoid Humanoid Humanoid)
+# seed_id=(0 0 0 0)
+# update_every_id=(40 80 150 200)
+
+# gpu_id=(7 7 6 6 5 5 4)
+# env_id=(HalfCheetah Hopper Hopper Walker2d Swimmer Ant Swimmer)
+# gin_id=(HalfCheetah Hopper Hopper Walker2d Swimmer Ant Swimmer)
+# seed_id=(1 1 1 1 1 1 1)
+# update_every_id=(1 1 150 2 200 150 5)
+
+gpu_id=(7 6)
+env_id=(Hopper Hopper)
+gin_id=(Hopper Hopper)
+seed_id=(7 13)
+update_every_id=(150 150)
+
+# gpu_id=(7 5)
+# env_id=(Hopper Swimmer)
+# gin_id=(Hopper Swimmer)
+# seed_id=(1 1)
+# update_every_id=(1 200)
 
 
 # gpu_id=(4 4 4)
@@ -71,14 +89,15 @@ do
                     --remark "tf-${env_id[i]}, FoSta, ppo, max_step=3000000" \
                     > ./my_log/exp_${algo}_${env_id[i]}_fourier_s${seed_id[i]}_up${update_every_id[i]}.log 2>&1 &
 
-    # CUDA_VISIBLE_DEVICES=${gpu_id[i]} python -u eager_main_ofePaper_ppo.py \
-    #                 --policy ${algo} \
-    #                 --env ${env_id[i]}-v2 \
-    #                 --gin ./gins_${algo}/${gin_id[i]}.gin \
-    #                 --seed ${seed_id[i]} \
-    #                 --save_model \
-    #                 --dir-root "./output_${algo}" \
-    #                 > ./my_log/exp_${algo}_${env_id[i]}_ofePaper_s${seed_id[i]}.log 2>&1 &
+    CUDA_VISIBLE_DEVICES=${gpu_id[i]} python -u eager_main_ofePaper_ppo.py \
+                    --policy ${algo} \
+                    --env ${env_id[i]}-v2 \
+                    --gin ./gins_${algo}/${gin_id[i]}.gin \
+                    --seed ${seed_id[i]} \
+                    --save_model \
+                    --update_every ${update_every_id[i]} \
+                    --dir-root "./output_${algo}" \
+                    > ./my_log/exp_${algo}_${env_id[i]}_ofePaper_s${seed_id[i]}_up${update_every_id[i]}.log 2>&1 &
 
     # CUDA_VISIBLE_DEVICES=${gpu_id[i]} nohup python -u eager_main_ofePaper_ppo.py \
     #                 --policy ${algo} \

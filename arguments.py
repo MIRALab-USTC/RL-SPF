@@ -71,6 +71,9 @@ def parse_args():
     # network_weight
     parser.add_argument("--weight", default=0.5, type=float)
 
+    # get_data
+    parser.add_argument("--aux", default="raw", type=str, choices=['raw', 'OFE', 'FSP'])
+
     args = parser.parse_args()
 
     return args

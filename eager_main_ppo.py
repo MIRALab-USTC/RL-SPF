@@ -507,17 +507,14 @@ if __name__ == "__main__":
         args.steps = 3000000
     elif args.env.startswith('Walker2d'):
         args.steps = 5000000
-    main(args)
-    # args.update_every = 1
-    # args.tau = 0.005
-    # # target_update_freqs = [1000, 500, 800, 1500]
-    # # target_update_freqs = [2000, 3000, 4000, 5000]
-    # target_update_freqs = [6000, 8000, 10000, 15000]
-    # for target_update_freq in target_update_freqs:
-    #     args.target_update_freq = target_update_freq
-    #     main(args)
+    
+    if args.seed == 7:
+        seed_list = [7, 8, 12]
+    elif args.seed == 13:
+        seed_list = [13, 15, 16]
+    else:
+        raise ValueError("Wrong seed {}".format(args.seed))
 
-    # update_everys = [5, 40, 80, 150, 200, 500]
-    # for update_every in update_everys:
-    #     args.update_every = update_every
-    #     main(args)
+    for seed in seed_list:
+        args.seed = seed
+        main(args)
