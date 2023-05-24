@@ -1,10 +1,16 @@
-algo=SAC
+algo=PPO
 
-gpu_id=(7 7 6 6 5 5)
-env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
-gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
-seed_id=(0 0 0 0 0 0)
-update_every_id=(5 150 2 200 150 1)
+# gpu_id=(5 7 6 6 5 7)
+# env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
+# gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
+# seed_id=(0 0 0 0 0 0)
+# update_every_id=(5 150 2 200 150 1)
+
+gpu_id=(4)
+env_id=(Swimmer)
+gin_id=(Swimmer)
+seed_id=(16)
+update_every_id=(200)
 
 for ((i=0;i<${#gpu_id[@]};i++))
 do

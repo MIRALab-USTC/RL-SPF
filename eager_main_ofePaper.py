@@ -136,14 +136,14 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
 
 
 @gin.configurable
-def feature_extractor(env_name, dim_state, dim_action, name=None, skip_action_branch=False):
+def feature_extractor(env_name, dim_state, dim_action, normalizer='batch', name=None, skip_action_branch=False):
     logger = logging.getLogger(name="main")
     logger.info("Use Extractor {}".format(name))
 
     if name == "OFE":
         target_dim = get_target_dim(env_name)
         extractor = OFENet(dim_state=dim_state, dim_action=dim_action,
-                           dim_output=target_dim, skip_action_branch=skip_action_branch)
+                           dim_output=target_dim, normalizer=normalizer, skip_action_branch=skip_action_branch)
         # print network parameters of OFENet
         print("OFENet's network structure:\n")
         tvars = extractor.trainable_variables
@@ -205,7 +205,7 @@ def main(args):
     dim_state = env.observation_space.shape[0]
     dim_action = env.action_space.shape[0]
 
-    extractor = feature_extractor(env_name, dim_state, dim_action)
+    extractor = feature_extractor(env_name, dim_state, dim_action, args.normalizer)
 
     # Makes a summary writer before graph construction
     writer = tf.summary.create_file_writer(dir_log)
@@ -351,6 +351,7 @@ if __name__ == "__main__":
     parser.add_argument("--dir-root", default="output", type=str)
     parser.add_argument("--save_model", default=False, action="store_true")
     parser.add_argument("--save_freq", default=100000, type=int)
+    parser.add_argument("--normalizer", default='layer', type=str, choices=['layer', 'batch'])
     args = parser.parse_args()
     
     main(args)

@@ -18,7 +18,8 @@ layers = tf.keras.layers
 @gin.configurable
 class OFENet(tf.keras.Model):
     def __init__(self, dim_state, dim_action, dim_output, total_units,
-                 num_layers, batchnorm, activation=tf.nn.relu, block="normal",
+                 num_layers, batchnorm, activation=tf.nn.relu, 
+                 block="normal", normalizer="batch",
                  kernel_initializer="glorot_uniform",
                  trainable=True, name='FeatureNet',
                  gpu=0, skip_action_branch=False):
@@ -54,7 +55,7 @@ class OFENet(tf.keras.Model):
                 cur_block = block_class(units1=state_layer_units[i * 2], units2=state_layer_units[i * 2 + 1],
                                         activation=self.act,
                                         kernel_initializer=kernel_initializer,
-                                        batchnorm=batchnorm,
+                                        batchnorm=batchnorm, 
                                         trainable=trainable)
                 state_blocks.append(cur_block)
 
@@ -62,7 +63,7 @@ class OFENet(tf.keras.Model):
                 cur_block = block_class(units1=action_layer_units[i * 2], units2=action_layer_units[i * 2 + 1],
                                         activation=self.act,
                                         kernel_initializer=kernel_initializer,
-                                        batchnorm=batchnorm,
+                                        batchnorm=batchnorm, 
                                         trainable=trainable)
                 action_blocks.append(cur_block)
         else:
@@ -76,14 +77,14 @@ class OFENet(tf.keras.Model):
             for idx_layer, cur_layer_units in enumerate(state_layer_units):
                 cur_block = block_class(units=cur_layer_units, activation=self.act,
                                         kernel_initializer=kernel_initializer,
-                                        batchnorm=batchnorm, trainable=trainable,
+                                        batchnorm=batchnorm, normalizer=normalizer, trainable=trainable,
                                         name="state{}".format(idx_layer))
                 state_blocks.append(cur_block)
 
             for idx_layer, cur_layer_units in enumerate(action_layer_units):
                 cur_block = block_class(units=cur_layer_units, activation=self.act,
                                         kernel_initializer=kernel_initializer,
-                                        batchnorm=batchnorm, trainable=trainable,
+                                        batchnorm=batchnorm, normalizer=normalizer, trainable=trainable,
                                         name="action{}".format(idx_layer))
                 action_blocks.append(cur_block)
 
@@ -113,9 +114,6 @@ class OFENet(tf.keras.Model):
         add_dim = self.dim_state_action_features - (dim_action + self.dim_state_features)
         logger.debug("state-action feature dim is {} (action-dim: {}, add: {})".format(
             self.dim_state_action_features, dim_action, add_dim))
-
-        import ipdb
-        ipdb.set_trace
 
     @property
     def dim_state_features(self):

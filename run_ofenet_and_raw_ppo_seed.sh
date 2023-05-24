@@ -1,6 +1,6 @@
-algo=SAC
+algo=PPO
 
-gpu_id=(7 7 6 6 5 5)
+gpu_id=(4 4 3 3 2 2)
 env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 seed_id=(0 0 0 0 0 0)
@@ -13,6 +13,7 @@ do
                     --env ${env_id[i]}-v2 \
                     --gin ./gins/${gin_id[i]}.gin \
                     --seed ${seed_id[i]} \
+                    --normalizer "layer" \
                     --save_model \
                     --update_every ${update_every_id[i]} \
                     --dir-root "./output_${algo}" \

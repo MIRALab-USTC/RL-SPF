@@ -4,6 +4,7 @@ __pycache__
 icml
 *.history/
 *output/
+*my_log/
 *output*/
 *results/
 *.png

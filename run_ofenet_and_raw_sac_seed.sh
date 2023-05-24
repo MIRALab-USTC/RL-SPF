@@ -1,6 +1,6 @@
 algo=SAC
 
-gpu_id=(7 7 6 6 5 5)
+gpu_id=(4 4 3 3 2 2)
 env_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 gin_id=(HalfCheetah Hopper Walker2d Swimmer Ant Humanoid)
 seed_id=(0 0 0 0 0 0)
@@ -12,6 +12,7 @@ do
                     --env ${env_id[i]}-v2 \
                     --gin ./gins/${gin_id[i]}.gin \
                     --seed ${seed_id[i]} \
+                    --normalizer "batch" \
                     --save_model \
                     --dir-root "./output_${algo}" \
                     > ./my_log/exp_${algo}_${env_id[i]}_ofePaper_s${seed_id[i]}.log 2>&1 &
