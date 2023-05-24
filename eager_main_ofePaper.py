@@ -83,9 +83,6 @@ def make_exp_name(args):
     if args.name is not None:
         exp_name = exp_name + "_" + args.name
 
-    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
-
     return exp_name
 
 

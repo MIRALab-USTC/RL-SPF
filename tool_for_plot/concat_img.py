@@ -128,10 +128,6 @@ def merge_images(image_dir_path,image_size,image_colnum, env, dir_name, env_name
 if __name__ == '__main__':
 
     # env_names = ['HalfCheetah-v2', 'Walker2d-v2', 'Hopper-v2', 'Ant-v2', 'Swimmer-v2', 'Humanoid-v2']
-    # dir_names = ['true and predicted_fourier_module', 'true and predicted_fourier_angle', 'error_fourier_module', 'error_fourier_angle']
-    # dir_names = ['states', 'actions', 'true_fourier', 'predicted_fourier', 'error_fourier']
-    # dir_names = ['true and predicted_next_state_1', 'true and predicted_next_state_2', 'true and predicted_next_state_3', \
-    #     'true and predicted_next_state_4', 'true and predicted_next_state_5', 'true and predicted_next_state_6', 'true and predicted_next_state_7']
 
     # dir_names = ['true and predicted_next_state', 'true and predicted_fourier_module']
     dir_names = ['true and predicted_next_state']

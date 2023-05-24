@@ -85,9 +85,6 @@ def make_exp_name(args):
 
     exp_name += "_up{}".format(str(args.update_every))
 
-    # now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    # exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
-
     return exp_name
 
 

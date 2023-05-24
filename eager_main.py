@@ -97,9 +97,6 @@ def make_exp_name(args):
         exp_name = exp_name + "_" + args.name
 
     exp_name = exp_name + "_low15-high15-freq-loss"
-    now = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
-    exp_name = exp_name + "_" + now.strftime("%Y%m%d-%H%M")
-
     return exp_name
 
 
