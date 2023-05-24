@@ -8,7 +8,7 @@ The implementation of OFENet is follow the paper [Can Increasing Input Dimension
 
 
 ## Requirement
-We ran these codes on CUDA 10.2 & Driver 440.33.01.
+We ran these codes on CUDA 10.2 & Driver 440.33.01 & GeForce RTX 2080 Ti.
 
 ```bash
 $ conda create -n spf python=3.6

@@ -108,7 +108,7 @@ def get_datasets(logdir, condition=None, cond1='Condition1'):
 
             try:
                 # exp_data = pd.read_table(os.path.join(root,'progress.csv'))
-                exp_data = pd.read_csv(os.path.join(root, 'progress.csv'))  # pd.read_csv读取以逗号为分割符的文件
+                exp_data = pd.read_csv(os.path.join(root, 'progress.csv'))
             except:
                 print('Could not read from %s'%os.path.join(root,'progress.csv'))
                 continue
@@ -198,10 +198,10 @@ def make_plots(all_logdirs, legend=None, xaxis=None, values=None, cond1='Conditi
             ax.spines['left'].set_color('black')
             ax.spines['bottom'].set_linewidth(1.5)
             ax.spines['left'].set_linewidth(1.5)
-            ax.yaxis.get_offset_text().set(size=15)  # 科学计数数量级字体大小
+            ax.yaxis.get_offset_text().set(size=15)
             ax.xaxis.get_offset_text().set(size=15) 
             plt.savefig(dir, dpi=300, bbox_inches='tight') 
-    plt.show()  # plt.show()要放在savefig之后，否则保存的图片是空白，服务器上此条可注释
+    plt.show()
 
 
 def main(logdir, img_save_dir, legend, env):
@@ -317,6 +317,5 @@ if __name__ == "__main__":
                     logdir += os.sep
                     logdirs.append(logdir)
                     legend.append('{}-{}'.format(policy, aux))
-                    # logdir必须用windows中目录分割符（反斜杠\），因为后续使用的os.sep返回的是windows中的分割符
 
         main(logdirs, img_save_dir, legend, env)

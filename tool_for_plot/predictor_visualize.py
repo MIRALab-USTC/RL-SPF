@@ -163,7 +163,7 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
 
     dir_log = os.path.join(dir_root, "log_{}".format(dir_of_env[env_name]), exp_name, seed_name)
 
-    for cur_dir in [dir_log]:  # 如果存在文件名一样的，则递归的删除目录
+    for cur_dir in [dir_log]: 
         if not os.path.exists(cur_dir):
             raise ValueError("output directory {} does not exist".format(cur_dir))
 
@@ -384,7 +384,7 @@ def main():
             if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir)):
                 os.mkdir(os.path.join(img_save_dir, img_save_sub_dir))
             try:
-                exp_data = np.load(os.path.join(dir_log, 'rb_data.npz'))  # pd.read_csv读取以逗号为分割符的文件
+                exp_data = np.load(os.path.join(dir_log, 'rb_data.npz'))
             except:
                 print('Could not read from %s'%os.path.join(dir_log, 'rb_data.npz'))
                 continue
@@ -398,7 +398,7 @@ def main():
             if not os.path.exists(os.path.join(img_save_dir, img_save_sub_dir)):
                 os.mkdir(os.path.join(img_save_dir, img_save_sub_dir))
             try:
-                exp_data = pd.read_csv(os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name])))  # pd.read_csv读取以逗号为分割符的文件
+                exp_data = pd.read_csv(os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name])))
                 logger.info('load data from {}'.format(os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name]))))
             except:
                 print('Could not read from %s'%os.path.join(img_save_dir, img_save_sub_dir, '{}_state_action_data.csv'.format(dir_of_env[env_name])))

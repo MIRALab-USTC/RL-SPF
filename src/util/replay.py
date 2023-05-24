@@ -56,7 +56,7 @@ class ReplayBuffer(object):
         return cur_states, cur_actions, cur_next_states, cur_rewards.reshape(-1, 1), cur_dones.reshape(-1, 1)
 
     def sample_indices(self, indices):
-        """指定されたindexのデータ群を返す
+        """
 
         :param indices:
         :return:

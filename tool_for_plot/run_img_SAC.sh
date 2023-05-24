@@ -69,7 +69,7 @@ do
                     --suffix ${suffix} \
                     --data_source ${data_source} \
                     --remark "tf-${env_id[i]}, FoSta, visualization" \
-                    > ./my_log/visualize_${algo}_${env_id[i]}_${file_name[4]}.log 2>&1 &
+                    > ./my_log/visualize_${algo}_${env_id[i]}_${file_name[2]}.log 2>&1 &
     
     python ${file_name[3]}.py --suffix ${suffix} --data_source ${data_source} --policy ${algo} --env ${env_id[i]}-v2 &
 
@@ -90,6 +90,6 @@ do
                     --suffix ${suffix} \
                     --data_source ${data_source} \
                     --remark "tf-${env_id[i]}, FoSta, visualization" \
-                    > ./my_log/video_${algo}_${env_id[i]}_${file_name[5]}2.log 2>&1 &
+                    > ./my_log/video_${algo}_${env_id[i]}_${file_name[4]}2.log 2>&1 &
                     
 done

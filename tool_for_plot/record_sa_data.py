@@ -161,7 +161,7 @@ def make_output_dir(dir_root, exp_name, env_name, seed, ignore_errors):
 
     dir_log = os.path.join(dir_root, "log_{}".format(dir_of_env[env_name]), exp_name, seed_name)
 
-    for cur_dir in [dir_log]:  # 如果存在文件名一样的，则递归的删除目录
+    for cur_dir in [dir_log]:
         if not os.path.exists(cur_dir):
             raise ValueError("output directory {} does not exist".format(cur_dir))
 

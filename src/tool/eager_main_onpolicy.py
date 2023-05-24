@@ -268,7 +268,6 @@ class Trainer:
                 state = self._env.reset()
                 episode_timesteps = 0
 
-        # pretrainingするように変更
         for i in range(random_collect):
             sample_states, sample_actions, sample_next_states, sample_rewards, sample_dones = replay_buffer.sample(
                 batch_size=64)
