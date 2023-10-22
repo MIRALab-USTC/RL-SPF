@@ -8,6 +8,7 @@ The implementation of OFENet is follow the paper [Can Increasing Input Dimension
 
 
 ## Requirements
+### CUDA10.2
 We ran these codes on CUDA 10.2 & Driver 440.33.01 & GeForce RTX 2080 Ti.
 
 ```bash
@@ -28,8 +29,31 @@ $ conda install --offline cudnn-7.6.5-cuda10.0_0.tar.bz2
 $ conda install cudatoolkit=10.0 cudnn tensorflow-gpu==2.0.0
 ```
 
+### CUDA11.8
+We also provide the environment setup on CUDA 11.8 & Driver 520.61.05 & GeForce RTX 3090 Ti.
+```bash
+$ conda create -n spf python=3.6
+$ source activate spf
+$ pip install tensorflow==2.6.0
+$ pip install tensorflow-gpu==2.6 --user
+$ pip install tensorflow-probability==0.14.0
+$ pip install -r ./requirements/requirements_tf26.txt  #  run this line at the project root
+```
+The corresponding dependency packages are as follows:
 
-### MuJoCo
++ cudatoolkit==11.3：
+```bash
+$ wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/linux-64/cudatoolkit-11.3.1-h2bc3f7f_2.conda
+$ conda install --use-local cudatoolkit-11.3.1-h2bc3f7f_2.conda
+```
++ cudnn==8.2.1：
+```bash
+$ wget https://repo.anaconda.com/pkgs/main/linux-64/cudnn-8.2.1-cuda11.3_0.conda
+$ conda install --use-local cudnn-8.2.1-cuda11.3_0.conda
+```
+
+
+### MuJoCo200
 
 Install MuJoCo 2.0 from the [official web site](http://www.mujoco.org/index.html).
 
@@ -43,39 +67,40 @@ $ cp /path/to/mjkey.txt ./
 $ pip install mujoco_py
 ```
 
+
 ## Usage
 
-Go to the root directory `SPF`. 
+Go to the root directory `SPF`. Below is an illustration of the directory structure.
 
 ```
 SPF
-├── gins  `(hyperparameters configuration of neural networks)`
-├── my_log  # files for saving terminal outputs
-├── src  # core codes
+├── gins (hyperparameters configuration of neural networks)
+├── my_log (files for saving terminal outputs)
+├── src (core codes)
 │   ├── aux
-│   │   ├── blocks.py  # 
-│   │   ├── network.py  # core codes of SPF
-│   │   ├── network_ofePaper.py
+│   │   ├── blocks.py (structure of net blocks)
+│   │   ├── network.py  (network and update of SPF, our method)
+│   │   ├── network_ofePaper.py (network and update of OFENet, baseline)
 │   │   ├── ...
-│   ├── policy
+│   ├── policy (classic RL algorithms)
 │   │   ├── SAC.py
 │   │   ├── PPO.py
 │   │   └── ...
 │   ├── tool
 │   ├── util
-├── tool_for_plot
+├── tool_for_plot (visualization tools)
 ├── trfl
 ├── README.md
-├── arguments.py  # hyperparameters configuration of SPF
-├── eager_main*.py  # Train and Evaluate
-├── run*.sh  # execute commands
+├── arguments.py (hyperparameters configuration of SPF)
+├── eager_main*.py (train and evaluate)
+├── run*.sh (execute commands)
 ```
-`arguments.py`
 
 ### Reproduce the results
 Create a folder named "my_log" at the project root before running the code.
 
 To train an agent with SPF combined with SAC, run the below command at the project root. The code then starts training the agent on 6 MuJoCo tasks in seed 0.
+
 
 ```bash
 $ bash run_spf_sac_seed.sh
