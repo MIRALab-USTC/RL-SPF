@@ -44,7 +44,7 @@ dir_of_env = {'HalfCheetah-v2': 'hc',
             'Swimmer-v2': 'swim', 
             'Humanoid-v2': 'human'}
 
-# bash test/run_img.sh
+# bash test/run_img_SAC.sh
 # drawing true and pred fourier legended on module and angle，true and predicted on the same plots for comparision
 
 def evaluate_policy(env, policy, eval_episodes=10, record_state=False):

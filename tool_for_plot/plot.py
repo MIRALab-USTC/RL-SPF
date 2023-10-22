@@ -10,7 +10,7 @@ import re
 
 DIV_LINE_WIDTH = 50
 
-# Global vars for tracking and labeling data at load time.
+# Plot training curves.
 exp_idx = 0
 units = dict()
 

@@ -30,17 +30,14 @@ $ conda install cudatoolkit=10.0 cudnn tensorflow-gpu==2.0.0
 ```
 
 ### CUDA11.8
-We also provide the environment setup on CUDA 11.8 & Driver 520.61.05 & GeForce RTX 3090 Ti.
-```bash
-$ conda create -n spf python=3.6
-$ source activate spf
-$ pip install tensorflow==2.6.0
-$ pip install tensorflow-gpu==2.6 --user
-$ pip install tensorflow-probability==0.14.0
-$ pip install -r ./requirements/requirements_tf26.txt  #  run this line at the project root
-```
-The corresponding dependency packages are as follows:
+We have also provided the environment setup on CUDA 11.8 & Driver 520.61.05 & GeForce RTX 3090 Ti.
 
+Create the environment:
+```bash
+$ conda create -n spf python=3.7
+$ source activate spf
+```
+Install dependencies for Tensorflow 2.6.0:
 + cudatoolkit==11.3：
 ```bash
 $ wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/linux-64/cudatoolkit-11.3.1-h2bc3f7f_2.conda
@@ -51,7 +48,13 @@ $ conda install --use-local cudatoolkit-11.3.1-h2bc3f7f_2.conda
 $ wget https://repo.anaconda.com/pkgs/main/linux-64/cudnn-8.2.1-cuda11.3_0.conda
 $ conda install --use-local cudnn-8.2.1-cuda11.3_0.conda
 ```
-
+Install Tensorflow 2.6.0 and other libraries:
+```bash
+$ pip install tensorflow==2.6.0
+$ pip install tensorflow-gpu==2.6 --user
+$ pip install tensorflow-probability==0.14.0
+$ pip install -r ./requirements/requirements_tf26.txt  #  run this line at the project root
+```
 
 ### MuJoCo200
 
@@ -74,6 +77,7 @@ Go to the root directory `SPF`. Below is an illustration of the directory struct
 
 ```
 SPF
+├── curves
 ├── gins (hyperparameters configuration of neural networks)
 ├── my_log (files for saving terminal outputs)
 ├── src (core codes)
@@ -86,7 +90,6 @@ SPF
 │   │   ├── SAC.py
 │   │   ├── PPO.py
 │   │   └── ...
-│   ├── tool
 │   ├── util
 ├── tool_for_plot (visualization tools)
 ├── trfl

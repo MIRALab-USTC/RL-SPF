@@ -1,5 +1,3 @@
-
-
 """Contains TensorFlow or Google-specific utilities for Gin configuration."""
 
 from __future__ import absolute_import

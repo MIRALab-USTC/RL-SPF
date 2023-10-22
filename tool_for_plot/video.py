@@ -45,7 +45,7 @@ dir_of_env = {'HalfCheetah-v2': 'hc',
             'Humanoid-v2': 'human'}
 
 # bash test/run_test.sh
-# record state and action data for specific saved model
+# record video for specific saved model
 
 def save_frames_as_gif(frames, args, dir_root='./results/video', filename='gym_animation.gif'):
 

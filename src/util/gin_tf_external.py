@@ -1,4 +1,8 @@
+"""Supplies a default set of configurables from core TensorFlow.
 
+This comes from https://raw.githubusercontent.com/google/gin-config/master/gin/tf/external_configurables.py
+This script was modified to support TF 2.0.
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function

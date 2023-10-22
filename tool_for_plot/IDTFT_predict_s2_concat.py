@@ -47,7 +47,7 @@ dir_of_env = {'HalfCheetah-v2': 'hc',
             'Humanoid-v2': 'human'}
 
 # bash test/run_img.sh
-# recover future steps, drawing in the same figure
+# recover future state sequences from predicted DTFT, drawing in the same figure
 
 def evaluate_policy(env, policy, eval_episodes=10, record_state=False):
     avg_reward = 0.
