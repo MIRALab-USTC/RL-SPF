@@ -47,14 +47,14 @@ $ pip install mujoco_py
 
 Go to the root directory `SPF`. 
 
-```python
+```
 SPF
-├── gins  # hyperparameters configuration of neural networks
+├── gins  `(hyperparameters configuration of neural networks)`
 ├── my_log  # files for saving terminal outputs
 ├── src  # core codes
 │   ├── aux
-│   │   ├── blocks.py
-│   │   ├── network.py
+│   │   ├── blocks.py  # 
+│   │   ├── network.py  # core codes of SPF
 │   │   ├── network_ofePaper.py
 │   │   ├── ...
 │   ├── policy
@@ -66,9 +66,9 @@ SPF
 ├── tool_for_plot
 ├── trfl
 ├── README.md
-├── arguments.py
-├── eager_main*.py
-├── run*.sh
+├── arguments.py  # hyperparameters configuration of SPF
+├── eager_main*.py  # Train and Evaluate
+├── run*.sh  # execute commands
 ```
 `arguments.py`
 
@@ -101,7 +101,7 @@ $ bash run_ofenet_and_raw_ppo_seed.sh
 
 ### Retrieve the results
 
-`eager_main*.py` generates a log file under "./output_${algo}/log_${env}" directory. 
+`eager_main*.py` generates a log file under `./output_${algo}/log_${env}` directory. 
 You can watch the result of an experiment with tensorboard.
 
 ```bash
