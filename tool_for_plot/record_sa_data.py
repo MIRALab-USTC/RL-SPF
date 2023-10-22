@@ -239,7 +239,7 @@ def main():
 
     for env_name in env_names:
         # CONSTANTS
-        args.gin = os.path.join('./gins_test', env_name.split('-')[0] + '.gin')
+        args.gin = os.path.join('./gins', env_name.split('-')[0] + '.gin')
         if args.gin is not None:
             gin.parse_config_file(args.gin)
 

@@ -7,7 +7,7 @@ This repository contains SPF implementation, OFENet implementation, RL algorithm
 The implementation of OFENet is follow the paper [Can Increasing Input Dimensionality Improve Deep Reinforcement Learning?](https://arxiv.org/abs/2003.01629) from code link http://www.merl.com/research/license/OFENet.
 
 
-## Requirement
+## Requirements
 We ran these codes on CUDA 10.2 & Driver 440.33.01 & GeForce RTX 2080 Ti.
 
 ```bash
@@ -43,7 +43,36 @@ $ cp /path/to/mjkey.txt ./
 $ pip install mujoco_py
 ```
 
-## Examples
+## Usage
+
+Go to the root directory `SPF`. 
+
+```python
+SPF
+├── gins  # hyperparameters configuration of neural networks
+├── my_log  # files for saving terminal outputs
+├── src  # core codes
+│   ├── aux
+│   │   ├── blocks.py
+│   │   ├── network.py
+│   │   ├── network_ofePaper.py
+│   │   ├── ...
+│   ├── policy
+│   │   ├── SAC.py
+│   │   ├── PPO.py
+│   │   └── ...
+│   ├── tool
+│   ├── util
+├── tool_for_plot
+├── trfl
+├── README.md
+├── arguments.py
+├── eager_main*.py
+├── run*.sh
+```
+`arguments.py`
+
+### Reproduce the results
 Create a folder named "my_log" at the project root before running the code.
 
 To train an agent with SPF combined with SAC, run the below command at the project root. The code then starts training the agent on 6 MuJoCo tasks in seed 0.
@@ -70,11 +99,11 @@ $ bash run_ofenet_and_raw_ppo_seed.sh
 ```
 
 
-## Retrieve results
+### Retrieve the results
 
-`eager_main*.py` generates a log file under "output_algo" directory. 
+`eager_main*.py` generates a log file under "./output_${algo}/log_${env}" directory. 
 You can watch the result of an experiment with tensorboard.
 
 ```bash
-$ tensorboard --logdir ./output_SAC/log_env
+$ tensorboard --logdir ./output_SAC/log_hc
 ```
