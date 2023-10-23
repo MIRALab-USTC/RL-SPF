@@ -73,10 +73,10 @@ $ pip install mujoco_py
 
 ## Usage
 
-Go to the root directory `SPF`. Below is an illustration of the directory structure.
+Go to the root directory `RL-SPF`. Below is an illustration of the directory structure.
 
 ```
-SPF
+RL-SPF
 ├── curves
 ├── gins (hyperparameters configuration of neural networks)
 ├── my_log (files for saving terminal outputs)
