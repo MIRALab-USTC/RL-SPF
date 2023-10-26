@@ -1,6 +1,8 @@
 # SPF
 ![](./figures/network%20structure.png)
-State Sequences Prediction via Fourier Transform (SPF) is a representation learning method that predicts the Fourier transform of state sequences to extract the underlying structural information in state sequences for learning expressive representations efficiently. 
+This is the code of paper "**State Sequences Prediction via Fourier Transform for Representation Learning**". Mingxuan Ye, Yufei Kuang, Jie Wang, Rui Yang, Wengang Zhou, Houqiang Li, Feng Wu. NeurIPS 2023 (Spotlight).
+
+**State Sequences Prediction via Fourier Transform (SPF)** is a representation learning method that predicts the Fourier transform of state sequences to extract the underlying structural information in state sequences for learning expressive representations efficiently. 
 It can be combined with algorithms such as PPO and SAC.
 
 This repository contains SPF implementation, OFENet implementation, RL algorithms, and hyperparameters, which we used in our paper. 
