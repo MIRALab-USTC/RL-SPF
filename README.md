@@ -1,4 +1,5 @@
 # SPF
+![](./figures/network%20structure.png)
 State Sequences Prediction via Fourier Transform (SPF) is a representation learning method that predicts the Fourier transform of state sequences to extract the underlying structural information in state sequences for learning expressive representations efficiently. 
 It can be combined with algorithms such as PPO and SAC.
 
